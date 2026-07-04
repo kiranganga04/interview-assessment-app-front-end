@@ -5,6 +5,38 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 });
 
+const AUTH_STORAGE_KEY = 'interviewAssessmentAuth';
+
+api.interceptors.request.use((config) => {
+  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (raw) {
+    const auth = JSON.parse(raw);
+    if (auth?.token) config.headers.Authorization = `Bearer ${auth.token}`;
+  }
+  return config;
+});
+
+// ---- Auth ----
+export const getStoredAuth = () => {
+  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    return null;
+  }
+};
+
+export const storeAuth = (auth) => localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+
+export const clearAuth = () => localStorage.removeItem(AUTH_STORAGE_KEY);
+
+export const signUp = (payload) => api.post('/auth/signup', payload).then(r => r.data);
+
+export const signIn = (payload) => api.post('/auth/signin', payload).then(r => r.data);
+
 // ---- Candidates ----
 export const listCandidates = (name) =>
   api.get('/candidates', { params: name ? { name } : {} }).then(r => r.data);
