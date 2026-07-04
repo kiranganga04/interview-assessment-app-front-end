@@ -96,6 +96,8 @@ export const deleteSkill = (id) => api.delete(`/skills/${id}`);
 // ---- Users / admin (module 2) ----
 export const listUsers = () => api.get('/users').then(r => r.data);
 
+export const createUser = (payload) => api.post('/users', payload).then(r => r.data);
+
 export const updateUserRole = (id, payload) => api.put(`/users/${id}/role`, payload).then(r => r.data);
 
 // ---- Files (module 5) ----
