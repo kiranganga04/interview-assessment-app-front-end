@@ -1,6 +1,11 @@
 import React from 'react';
 
-export default function SkillAssessmentTable({ title, rows, onChange, showSelfRating = true }) {
+/**
+ * Module 4: skillOptions (from the admin-managed skill catalog) feeds a <datalist> so
+ * panelists get autocomplete suggestions instead of retyping skill names from scratch,
+ * while still allowing a free-text entry for anything not yet in the catalog.
+ */
+export default function SkillAssessmentTable({ title, rows, onChange, showSelfRating = true, skillOptions = [] }) {
   const update = (idx, field, value) => {
     const next = rows.map((r, i) => (i === idx ? { ...r, [field]: value } : r));
     onChange(next);
@@ -17,9 +22,16 @@ export default function SkillAssessmentTable({ title, rows, onChange, showSelfRa
     onChange(rows.filter((_, i) => i !== idx).map((r, i) => ({ ...r, skillOrder: i + 1 })));
   };
 
+  const datalistId = `skill-options-${title.replace(/\s+/g, '-').toLowerCase()}`;
+
   return (
     <div>
       <div className="section-title">{title}</div>
+      {skillOptions.length > 0 && (
+        <datalist id={datalistId}>
+          {skillOptions.map((s) => <option key={s.skillId} value={s.name} />)}
+        </datalist>
+      )}
       <div
         className="skill-row"
         style={{ fontSize: 11, textTransform: 'uppercase', color: 'var(--ink-muted)', fontWeight: 600 }}
@@ -36,6 +48,7 @@ export default function SkillAssessmentTable({ title, rows, onChange, showSelfRa
             placeholder={`Skill ${row.skillOrder}`}
             value={row.skillName || ''}
             onChange={(e) => update(idx, 'skillName', e.target.value)}
+            list={skillOptions.length > 0 ? datalistId : undefined}
           />
           {showSelfRating ? (
             <input

@@ -23,7 +23,7 @@ export default function AuthPage({ mode, onAuthenticated }) {
       const auth = isSignUp ? await signUp(payload) : await signIn(payload);
       storeAuth(auth);
       onAuthenticated?.(auth);
-      navigate('/interviews', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.message || 'Authentication failed. Please try again.');
     } finally {
@@ -96,6 +96,12 @@ export default function AuthPage({ mode, onAuthenticated }) {
             {isSignUp ? 'Sign in' : 'Create account'}
           </Link>
         </p>
+
+        {!isSignUp && (
+          <p className="auth-switch">
+            <Link to="/forgot-password">Forgot your password?</Link>
+          </p>
+        )}
       </section>
     </main>
   );

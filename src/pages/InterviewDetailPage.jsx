@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getInterview } from '../api/apiClient';
+import { getInterview, changeInterviewStatus, listAttachments, attachmentDownloadHref } from '../api/apiClient';
 import RatingBadge from '../components/RatingBadge';
+import { useToast } from '../components/layout/ToastProvider';
+
+const NEXT_STATUS = {
+  SCHEDULED: ['IN_PROGRESS', 'CLOSED'],
+  IN_PROGRESS: ['SUBMITTED', 'CLOSED'],
+  SUBMITTED: ['RECOMMENDED', 'IN_PROGRESS', 'CLOSED'],
+  RECOMMENDED: ['CLOSED'],
+  CLOSED: []
+};
 
 function SkillTable({ title, rows, showSelf }) {
   return (
@@ -32,18 +41,36 @@ function SkillTable({ title, rows, showSelf }) {
   );
 }
 
-export default function InterviewDetailPage() {
+export default function InterviewDetailPage({ auth }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [iv, setIv] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [error, setError] = useState('');
+  const canManage = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER' || auth?.role === 'PANEL';
 
-  useEffect(() => {
+  const load = () => {
     getInterview(id).then(setIv).catch((e) => setError(e?.response?.data?.message || 'Failed to load record.'));
-  }, [id]);
+    listAttachments('INTERVIEW_SCREENSHOT', id).then(setAttachments).catch(() => {});
+  };
+
+  useEffect(load, [id]);
+
+  const handleStatusChange = async (status) => {
+    try {
+      const updated = await changeInterviewStatus(id, status);
+      setIv(updated);
+      toast.success(`Status moved to ${status.replace('_', ' ')}.`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not change status.');
+    }
+  };
 
   if (error) return <div className="page"><div className="error-banner">{error}</div></div>;
   if (!iv) return <div className="loading">Loading…</div>;
+
+  const nextStatuses = NEXT_STATUS[iv.status] || [];
 
   return (
     <div className="page">
@@ -54,13 +81,14 @@ export default function InterviewDetailPage() {
           <p>{iv.currentRole || 'Role not specified'} · {iv.overallExperience || '—'} yrs experience</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn btn-secondary" onClick={() => navigate(`/interviews/${id}/edit`)}>Edit</button>
+          {canManage && <button className="btn btn-secondary" onClick={() => navigate(`/interviews/${id}/edit`)}>Edit</button>}
           <button className="btn btn-ghost" onClick={() => navigate('/interviews')}>Back to list</button>
         </div>
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
         <div className="card-body form-grid cols-3">
+          <div><div className="eyebrow">Status</div><div><span className={`status-chip status-${(iv.status || '').toLowerCase()}`}>{(iv.status || '—').replace('_', ' ')}</span></div></div>
           <div><div className="eyebrow">Panel member</div><div>{iv.panelMemberName || '—'}</div></div>
           <div><div className="eyebrow">Recruiter</div><div>{iv.recruiterName || '—'}</div></div>
           <div><div className="eyebrow">Mode</div><div>{iv.modeOfInterview || '—'}</div></div>
@@ -70,6 +98,17 @@ export default function InterviewDetailPage() {
           <div><div className="eyebrow">Final rating</div><div><RatingBadge value={iv.finalRating} showLabel /></div></div>
           <div><div className="eyebrow">Recommendation</div><div><span className="pill">{iv.panelRecommendation || '—'}</span></div></div>
         </div>
+
+        {canManage && nextStatuses.length > 0 && (
+          <div className="card-body" style={{ borderTop: '1px solid var(--line)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ color: 'var(--ink-muted)', fontSize: 12.5, fontWeight: 700, alignSelf: 'center' }}>Move to:</span>
+            {nextStatuses.map((s) => (
+              <button key={s} type="button" className="btn btn-secondary btn-sm" onClick={() => handleStatusChange(s)}>
+                {s.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {iv.overallAssessment && (
@@ -104,6 +143,24 @@ export default function InterviewDetailPage() {
       </div>
 
       <SkillTable title="Client technical panel ratings" rows={iv.clientSkillAssessments} showSelf={false} />
+
+      {(attachments.length > 0 || iv.interviewScreenshotUrl) && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div className="card-header"><h3>Attachments</h3></div>
+          <div className="card-body">
+            {iv.interviewScreenshotUrl && (
+              <div style={{ marginBottom: 8 }}>
+                <a href={iv.interviewScreenshotUrl} target="_blank" rel="noreferrer">{iv.interviewScreenshotUrl}</a>
+              </div>
+            )}
+            {attachments.map((a) => (
+              <div key={a.attachmentId}>
+                <a href={attachmentDownloadHref(a.attachmentId)} target="_blank" rel="noreferrer">{a.originalFilename}</a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

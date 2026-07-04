@@ -1,29 +1,22 @@
-export const optimumLogo = 'https://theoptimum.net/wp-content/uploads/2022/11/Logo-mbl.png';
+// Module 11 (branding fix): this used to hotlink a real company's logo, nav links and
+// footer copy (theoptimum.net). That's someone else's trademark, not this project's — it's
+// been replaced with original, neutral branding for the Interview Assessment System itself.
 
-export const companyLinks = [
-  { label: 'Services', href: 'https://theoptimum.net/service/artificial-intelligence/' },
-  { label: 'Industry', href: 'https://theoptimum.net/industry/banking-financial-services/' },
-  { label: 'Insights', href: 'https://theoptimum.net/insights/' },
-  { label: 'Careers', href: 'https://theoptimum.net/careers/' },
-  { label: 'About', href: 'https://theoptimum.net/about-us/' },
-  { label: 'Contact Us', href: 'https://theoptimum.net/contact-us/' }
-];
+export const productName = 'Interview Assessment System';
+
+export const productTagline = 'Panel evaluation workspace';
 
 export const footerGroups = [
   {
-    title: 'Services',
-    links: ['Artificial Intelligence', 'App Dev & Maintenance', 'Data & Analytics', 'Global Capability Centers (GCC)', 'Cloud, Infrastructure & Security', 'Testing', 'DevOps & Agile', 'Digital Customer Experience', 'Business Process Management']
+    title: 'Workspace',
+    links: ['Assessments', 'New assessment', 'Dashboard']
   },
   {
-    title: 'Industry',
-    links: ['Banking & Financial Services', 'Insurance', 'HI-Tech', 'Retail', 'Public Sector']
+    title: 'Administration',
+    links: ['Skill catalog', 'User management']
   },
   {
-    title: 'Quick Links',
-    links: ['About Us', 'Locations', 'Events', 'Blog', 'Working at Optimum', 'Recruitment Fraud Alert']
-  },
-  {
-    title: 'More Info',
-    links: ['Case Studies', 'Insights', 'News', 'Terms & Conditions', 'Privacy Policy', 'Net Zero Commitment', 'D&I Policy']
+    title: 'About',
+    links: ['Candidate ratings are recorded on a 1–5 scale', 'Internal and client panel rounds are tracked separately']
   }
 ];

@@ -1,14 +1,20 @@
 import React from 'react';
-import { footerGroups, optimumLogo } from '../../config/navigation';
+import { footerGroups, productName } from '../../config/navigation';
 
 export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-shell">
         <div className="footer-brand">
-          <img src={optimumLogo} alt="Optimum Solutions" />
-          <p>Founded in 1997, Optimum is a full-spectrum IT services and solutions company whose mission is to "Empower Business with Technology."</p>
-          <a className="btn btn-secondary" href="https://theoptimum.net/contact-us/" target="_blank" rel="noreferrer">Contact Us</a>
+          <div className="footer-mark">
+            <span className="mark">IA</span>
+            <strong>{productName}</strong>
+          </div>
+          <p>
+            A focused workspace for recruiters and interview panels to capture candidate
+            evaluations, skill ratings, coding-round outcomes and hiring recommendations
+            in one consistent record.
+          </p>
         </div>
 
         <div className="footer-links">
@@ -20,7 +26,7 @@ export default function SiteFooter() {
           ))}
         </div>
 
-        <div className="footer-bottom">Copyright (c) Optimum Solutions (S) Pte. Ltd.</div>
+        <div className="footer-bottom">{productName} — internal hiring tool.</div>
       </div>
     </footer>
   );

@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   listCandidates, createCandidate,
-  getInterview, createInterview, updateInterview
+  getInterview, createInterview, updateInterview,
+  listActiveSkills, uploadFile, listAttachments, attachmentDownloadHref
 } from '../api/apiClient';
 import SkillAssessmentTable from '../components/SkillAssessmentTable';
 import CodingRoundTable from '../components/CodingRoundTable';
+import { useToast } from '../components/layout/ToastProvider';
 
 const DEFAULT_SKILLS = ['Core Java', 'Springboot, API', 'Microservices', 'SQL', 'Coding', 'Design patterns']
   .map((name, i) => ({ skillOrder: i + 1, skillName: name, selfRating: '', rating: '', feedback: '' }));
@@ -17,6 +19,7 @@ const emptyForm = {
   levelOfInterview: 'L1',
   modeOfInterview: 'VIRTUAL',
   interviewDate: '',
+  scheduledAt: '',
   domainKnowledge: '',
   domainFeedback: '',
   communicationRating: '',
@@ -33,16 +36,21 @@ export default function InterviewFormPage() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [form, setForm] = useState(emptyForm);
   const [candidates, setCandidates] = useState([]);
+  const [skillOptions, setSkillOptions] = useState([]);
   const [newCandidateMode, setNewCandidateMode] = useState(false);
   const [newCandidate, setNewCandidate] = useState({ candidateName: '', mobileNumber: '', overallExperience: '', currentRole: '' });
+  const [resumeUploading, setResumeUploading] = useState(false);
+  const [screenshotAttachments, setScreenshotAttachments] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     listCandidates().then(setCandidates).catch(() => {});
+    listActiveSkills().then(setSkillOptions).catch(() => {});
     if (isEdit) {
       getInterview(id).then((iv) => {
         setForm({
@@ -52,6 +60,7 @@ export default function InterviewFormPage() {
           levelOfInterview: iv.levelOfInterview || 'L1',
           modeOfInterview: iv.modeOfInterview || 'VIRTUAL',
           interviewDate: iv.interviewDate || '',
+          scheduledAt: iv.scheduledAt || '',
           domainKnowledge: iv.domainKnowledge || '',
           domainFeedback: iv.domainFeedback || '',
           communicationRating: iv.communicationRating ?? '',
@@ -64,6 +73,7 @@ export default function InterviewFormPage() {
           codingRounds: iv.codingRounds
         });
       }).catch((e) => setError(e?.response?.data?.message || 'Failed to load record.'));
+      listAttachments('INTERVIEW_SCREENSHOT', id).then(setScreenshotAttachments).catch(() => {});
     }
   }, [id, isEdit]);
 
@@ -76,6 +86,36 @@ export default function InterviewFormPage() {
     setField('candidateId', created.candidateId);
     setNewCandidateMode(false);
     setNewCandidate({ candidateName: '', mobileNumber: '', overallExperience: '', currentRole: '' });
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !form.candidateId) return;
+    setResumeUploading(true);
+    try {
+      await uploadFile('CANDIDATE_RESUME', form.candidateId, file);
+      toast.success('Resume uploaded.');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to upload resume.');
+    } finally {
+      setResumeUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleScreenshotUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !isEdit) return;
+    try {
+      await uploadFile('INTERVIEW_SCREENSHOT', id, file);
+      const refreshed = await listAttachments('INTERVIEW_SCREENSHOT', id);
+      setScreenshotAttachments(refreshed);
+      toast.success('File uploaded.');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to upload file.');
+    } finally {
+      e.target.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -91,6 +131,7 @@ export default function InterviewFormPage() {
       candidateId: Number(form.candidateId),
       communicationRating: form.communicationRating === '' ? null : Number(form.communicationRating),
       finalRating: form.finalRating === '' ? null : Number(form.finalRating),
+      scheduledAt: form.scheduledAt || null,
       internalSkillAssessments: form.internalSkillAssessments.map((s) => ({
         ...s, selfRating: s.selfRating === '' ? null : Number(s.selfRating), rating: s.rating === '' ? null : Number(s.rating)
       })),
@@ -105,6 +146,7 @@ export default function InterviewFormPage() {
     };
     try {
       const saved = isEdit ? await updateInterview(id, payload) : await createInterview(payload);
+      toast.success(isEdit ? 'Assessment updated.' : 'Assessment created.');
       navigate(`/interviews/${saved.interviewId}`);
     } catch (e) {
       setError(e?.response?.data?.message || 'Failed to save assessment.');
@@ -148,6 +190,12 @@ export default function InterviewFormPage() {
               <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', padding: '4px 0' }} onClick={() => setNewCandidateMode((v) => !v)}>
                 {newCandidateMode ? 'Cancel' : '+ New candidate'}
               </button>
+              {form.candidateId && !newCandidateMode && (
+                <div style={{ marginTop: 8 }}>
+                  <label style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink-muted)' }}>Candidate resume (module 5)</label>
+                  <input type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} disabled={resumeUploading} />
+                </div>
+              )}
             </div>
 
             <div className="field">
@@ -167,6 +215,10 @@ export default function InterviewFormPage() {
               </select>
             </div>
             <div className="field"><label>Date of interview</label><input type="date" value={form.interviewDate} onChange={(e) => setField('interviewDate', e.target.value)} /></div>
+            <div className="field">
+              <label>Scheduled at (module 3)</label>
+              <input type="datetime-local" value={form.scheduledAt} onChange={(e) => setField('scheduledAt', e.target.value)} />
+            </div>
             <div className="field span-2"><label>Domain knowledge</label><input placeholder="e.g. Banking, Logistics & Supply Chain" value={form.domainKnowledge} onChange={(e) => setField('domainKnowledge', e.target.value)} /></div>
             <div className="field"><label>Domain feedback</label><input value={form.domainFeedback} onChange={(e) => setField('domainFeedback', e.target.value)} /></div>
           </div>
@@ -179,6 +231,7 @@ export default function InterviewFormPage() {
               rows={form.internalSkillAssessments}
               onChange={(rows) => setField('internalSkillAssessments', rows)}
               showSelfRating
+              skillOptions={skillOptions}
             />
           </div>
         </div>
@@ -196,6 +249,7 @@ export default function InterviewFormPage() {
               rows={form.clientSkillAssessments}
               onChange={(rows) => setField('clientSkillAssessments', rows)}
               showSelfRating={false}
+              skillOptions={skillOptions}
             />
           </div>
         </div>
@@ -206,7 +260,20 @@ export default function InterviewFormPage() {
             <div className="field"><label>Communication rating</label><input type="number" min="1" max="5" step="0.5" value={form.communicationRating} onChange={(e) => setField('communicationRating', e.target.value)} /></div>
             <div className="field"><label>Final rating</label><input type="number" min="1" max="5" step="0.5" value={form.finalRating} onChange={(e) => setField('finalRating', e.target.value)} /></div>
             <div className="field"><label>Panel recommendation</label><input placeholder="e.g. L2 Selected" value={form.panelRecommendation} onChange={(e) => setField('panelRecommendation', e.target.value)} /></div>
-            <div className="field span-2"><label>Interview screenshot URL</label><input value={form.interviewScreenshotUrl} onChange={(e) => setField('interviewScreenshotUrl', e.target.value)} /></div>
+            <div className="field span-2"><label>Interview screenshot URL (optional)</label><input value={form.interviewScreenshotUrl} onChange={(e) => setField('interviewScreenshotUrl', e.target.value)} /></div>
+            {isEdit && (
+              <div className="field span-2">
+                <label>Or upload a screenshot / export file (module 5)</label>
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={handleScreenshotUpload} />
+                {screenshotAttachments.length > 0 && (
+                  <ul style={{ margin: '6px 0 0', paddingLeft: 18, fontSize: 13 }}>
+                    {screenshotAttachments.map((a) => (
+                      <li key={a.attachmentId}><a href={attachmentDownloadHref(a.attachmentId)} target="_blank" rel="noreferrer">{a.originalFilename}</a></li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
             <div className="field span-2" style={{ gridColumn: '1 / -1' }}>
               <label>Overall assessment (detailed feedback)</label>
               <textarea rows={3} value={form.overallAssessment} onChange={(e) => setField('overallAssessment', e.target.value)} />

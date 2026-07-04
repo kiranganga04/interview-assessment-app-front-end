@@ -73,69 +73,23 @@ button { cursor: pointer; }
   box-shadow: 0 10px 30px rgba(15, 38, 63, 0.14);
 }
 
-.site-header-inner,
-.product-nav,
-.footer-shell {
+.product-nav {
   width: min(100% - 48px, 1360px);
   margin: 0 auto;
 }
 
-.site-header-inner {
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 28px;
-}
-
-.company-logo {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
-.company-logo img {
-  width: 214px;
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.company-nav,
-.app-nav {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.company-nav a {
-  border-radius: var(--radius);
-  color: rgba(255,255,255,0.76);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 10px;
-  text-decoration: none;
-  transition: background .15s, color .15s;
-}
-
-.company-nav a:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-}
-
 .product-nav-wrap {
   background: rgba(255,255,255,0.04);
-  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
 .product-nav {
-  min-height: 64px;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  flex-wrap: wrap;
+  padding: 10px 0;
 }
 
 .app-title {
@@ -144,7 +98,8 @@ button { cursor: pointer; }
   gap: 12px;
 }
 
-.app-title .mark {
+.app-title .mark,
+.footer-mark .mark {
   width: 42px;
   height: 42px;
   border-radius: 10px;
@@ -174,6 +129,14 @@ button { cursor: pointer; }
   margin-top: 3px;
 }
 
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .app-nav a,
 .nav-button {
   border: 1px solid transparent;
@@ -200,6 +163,26 @@ button { cursor: pointer; }
   box-shadow: var(--shadow-sm);
 }
 
+.nav-user {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-chip {
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
 /* ---------- Layout ---------- */
 .page {
   flex: 1;
@@ -220,9 +203,9 @@ button { cursor: pointer; }
   padding: 30px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(90deg, rgba(15,38,63,0.96), rgba(25,59,98,0.88)),
-    url('https://theoptimum.net/wp-content/uploads/2025/06/hm-ai-data.jpg') center/cover;
+  /* Module 11: this used to load a third-party image (theoptimum.net) as the background.
+     Replaced with a self-contained gradient so the app has no external/hotlinked assets. */
+  background: linear-gradient(120deg, rgba(15,38,63,0.98), rgba(25,59,98,0.92) 55%, rgba(47,143,138,0.55));
   box-shadow: var(--shadow-md);
 }
 
@@ -266,6 +249,12 @@ button { cursor: pointer; }
 .hero-action {
   flex: 0 0 auto;
   box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+}
+
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
 .metric-grid {
@@ -378,7 +367,7 @@ button { cursor: pointer; }
 }
 
 .toolbar-filter select {
-  min-width: 150px;
+  min-width: 130px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: #fff;
@@ -424,6 +413,18 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .muted-cell { color: var(--ink-muted); font-size: 12.5px; }
 .row-actions { white-space: nowrap; text-align: right; }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* ---------- Rating badge ---------- */
 .rating-badge {
   display: inline-flex;
@@ -463,6 +464,24 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   min-height: 26px;
   padding: 4px 11px;
 }
+
+/* ---------- Status chip (module 3: workflow) ---------- */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 4px 11px;
+  text-transform: capitalize;
+}
+
+.status-scheduled { background: #e6edf7; color: var(--navy); }
+.status-in_progress { background: var(--amber-soft); color: #9a5a10; }
+.status-submitted { background: #e3f1ee; color: var(--teal); }
+.status-recommended { background: #e4f3ea; color: var(--green); }
+.status-closed { background: #eef0f3; color: var(--ink-muted); }
 
 .gauge {
   display: flex;
@@ -584,6 +603,32 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   padding: 12px 16px;
 }
 
+/* ---------- Toasts (module 11) ---------- */
+.toast-stack {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.toast {
+  background: var(--ink-strong);
+  color: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 12px 16px;
+  font-size: 13.5px;
+  max-width: 320px;
+  cursor: pointer;
+}
+
+.toast-success { background: var(--green); }
+.toast-error { background: var(--red); }
+.toast-info { background: var(--navy); }
+
 /* ---------- Footer ---------- */
 .site-footer {
   background: var(--navy-deep);
@@ -592,23 +637,31 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 }
 
 .footer-shell {
+  width: min(100% - 48px, 1360px);
+  margin: 0 auto;
   border-top: 1px solid rgba(255,255,255,0.12);
   padding-top: 24px;
 }
 
 .footer-brand {
   display: grid;
-  grid-template-columns: 220px minmax(260px, 1fr) auto;
+  grid-template-columns: 220px minmax(260px, 1fr);
   gap: 24px;
   align-items: center;
   padding-bottom: 22px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.footer-brand img {
-  width: 210px;
-  max-width: 100%;
-  display: block;
+.footer-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-mark strong {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 15px;
 }
 
 .footer-brand p {
@@ -620,7 +673,7 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 
 .footer-links {
   display: grid;
-  grid-template-columns: 1.35fr 1fr 1fr 1fr;
+  grid-template-columns: 1.35fr 1fr 1fr;
   gap: 24px;
   padding: 24px 0;
 }
@@ -709,7 +762,6 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .auth-switch a:hover { text-decoration: underline; }
 
 @media (max-width: 980px) {
-  .site-header-inner,
   .product-nav {
     width: min(100% - 32px, 1360px);
     align-items: flex-start;
@@ -717,13 +769,16 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
     padding: 16px 0;
   }
 
-  .company-nav,
   .app-nav {
     justify-content: flex-start;
   }
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-columns {
+    grid-template-columns: 1fr;
   }
 
   .footer-brand,
@@ -754,7 +809,6 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   }
 
   .field.span-2 { grid-column: span 1; }
-  .company-logo img { width: 204px; }
   .hero-action { width: 100%; }
   .toolbar-filter { align-items: flex-start; flex-direction: column; }
   .toolbar-filter select { width: 100%; }
