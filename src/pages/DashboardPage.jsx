@@ -1,34 +1,58 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboardSummary, getPassRateReport, getSkillAverageReport, getPanelistCalibrationReport } from '../api/apiClient';
+import { getDashboardSummary, getTodaysAgenda, getMonthlyInterviewsReport } from '../api/apiClient';
 
-/** Module 7: KPI tiles + a few simple tables — the reporting/analytics landing page. */
+const MONTH_LABEL = (key) => {
+  const [year, month] = key.split('-');
+  return new Date(Number(year), Number(month) - 1, 1).toLocaleString('en-US', { month: 'short' });
+};
+
+/**
+ * Dashboard Overview: stat tiles, Today's Agenda, Needs Attention, a lightweight Monthly
+ * Interviews bar chart, and a Quick Summary panel. The deeper pass-rate/skill-average/
+ * panelist-calibration tables that used to live here moved to the new Analytics page --
+ * same data, same endpoints, just regrouped so this page can focus on "what's happening
+ * right now" the way the reference dashboard does.
+ */
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
-  const [passRate, setPassRate] = useState([]);
-  const [skillAverages, setSkillAverages] = useState([]);
-  const [calibration, setCalibration] = useState([]);
+  const [agenda, setAgenda] = useState([]);
+  const [monthly, setMonthly] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([getDashboardSummary(), getPassRateReport(), getSkillAverageReport(), getPanelistCalibrationReport()])
-      .then(([s, pr, sa, pc]) => {
+    Promise.all([getDashboardSummary(), getTodaysAgenda(), getMonthlyInterviewsReport(6)])
+      .then(([s, a, m]) => {
         setSummary(s);
-        setPassRate(pr);
-        setSkillAverages(sa);
-        setCalibration(pc);
+        setAgenda(a);
+        setMonthly(m);
       })
       .catch((e) => setError(e?.response?.data?.message || 'Failed to load dashboard. (Reports are only available to Admin/Recruiter roles.)'));
   }, []);
+
+  const maxMonthly = Math.max(1, ...monthly.map((m) => m.count));
+  const totalThisPeriod = monthly.reduce((sum, m) => sum + m.count, 0);
+  const avgPerMonth = monthly.length ? (totalThisPeriod / monthly.length).toFixed(1) : '0.0';
+  const completionRate = summary && summary.totalInterviews
+    ? Math.round((summary.completedCount / summary.totalInterviews) * 100)
+    : 0;
+
+  const needsAttention = summary
+    ? [
+        { label: 'Pending feedback', count: summary.pendingFeedbackCount, ok: 'No pending feedback' },
+        { label: 'Overdue reviews', count: summary.overdueCount, ok: 'No overdue reviews' }
+      ]
+    : [];
+  const allCaughtUp = needsAttention.every((item) => !item.count);
 
   return (
     <main className="page">
       <section className="dashboard-hero">
         <div>
           <div className="eyebrow">Interview Assessment System</div>
-          <h1>Assessment command center</h1>
-          <p>Track candidate evaluations, panel recommendations, skill ratings, and coding outcomes from one focused workspace.</p>
+          <h1>Dashboard Overview</h1>
+          <p>Live interview pipeline and enterprise metrics, at a glance.</p>
         </div>
         <button className="btn btn-primary hero-action" onClick={() => navigate('/interviews')}>View assessments</button>
       </section>
@@ -48,74 +72,123 @@ export default function DashboardPage() {
             <small>Awaiting the interview</small>
           </div>
           <div className="metric-card">
-            <span>Submitted</span>
-            <strong>{summary.submittedCount}</strong>
-            <small>Ratings filled in, pending recommendation</small>
+            <span>Completed</span>
+            <strong>{summary.completedCount}</strong>
+            <small>Recommended or closed</small>
           </div>
           <div className="metric-card">
-            <span>Average final rating</span>
-            <strong>{summary.averageFinalRating?.toFixed ? summary.averageFinalRating.toFixed(1) : summary.averageFinalRating}</strong>
-            <small>Across all closed & open records</small>
+            <span>Cancelled</span>
+            <strong>{summary.cancelledCount}</strong>
+            <small>Withdrawn interviews</small>
+          </div>
+          <div className="metric-card">
+            <span>Candidates</span>
+            <strong>{summary.candidateCount}</strong>
+            <small>In the system</small>
+          </div>
+          <div className="metric-card">
+            <span>Interviewers</span>
+            <strong>{summary.interviewerCount}</strong>
+            <small>In the directory</small>
+          </div>
+          <div className="metric-card">
+            <span>Pending feedback</span>
+            <strong>{summary.pendingFeedbackCount}</strong>
+            <small>Ratings filled in, awaiting recommendation</small>
+          </div>
+          <div className="metric-card">
+            <span>Today's interviews</span>
+            <strong>{summary.todaysInterviewCount}</strong>
+            <small>Scheduled for today</small>
           </div>
         </section>
       )}
 
       <div className="dashboard-columns">
         <section className="card data-card">
-          <div className="card-header"><div><h3>Pass rate by level</h3><p>Share of interviews recommended, per level</p></div></div>
-          <table>
-            <thead><tr><th>Level</th><th>Total</th><th>Recommended</th><th>Pass rate</th></tr></thead>
-            <tbody>
-              {passRate.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No data yet.</td></tr>}
-              {passRate.map((row) => (
-                <tr key={row.level}>
-                  <td><span className="pill">{row.level}</span></td>
-                  <td>{row.total}</td>
-                  <td>{row.recommended}</td>
-                  <td>{row.passRatePercent}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="card-header">
+            <div>
+              <h3>Today's Agenda</h3>
+              <p>{agenda.length} scheduled today</p>
+            </div>
+          </div>
+          <div className="card-body">
+            {agenda.length === 0 && (
+              <div className="empty-state">
+                <div>No interviews scheduled today. A clear day — a good time to plan ahead.</div>
+              </div>
+            )}
+            {agenda.map((item) => (
+              <div key={item.interviewId} className="agenda-row" onClick={() => navigate(`/interviews/${item.interviewId}`)}>
+                <div>
+                  <strong>{item.candidateName}</strong>
+                  <div className="muted-cell">{item.interviewerOrPanelName || '—'} · {item.modeOfInterview || '—'}</div>
+                </div>
+                <div className="agenda-row-time">
+                  {item.scheduledAt ? new Date(item.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                  <span className={`status-chip status-${(item.status || '').toLowerCase()}`}>{(item.status || '-').replace('_', ' ')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="card data-card">
-          <div className="card-header"><div><h3>Average rating by skill</h3><p>Internal panel ratings only</p></div></div>
-          <table>
-            <thead><tr><th>Skill</th><th>Average</th><th>Ratings</th></tr></thead>
-            <tbody>
-              {skillAverages.length === 0 && <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No data yet.</td></tr>}
-              {skillAverages.map((row) => (
-                <tr key={row.skillName}>
-                  <td>{row.skillName}</td>
-                  <td>{row.averageRating}</td>
-                  <td>{row.ratingCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="card-header">
+            <div>
+              <h3>Needs Attention</h3>
+              <p>Pending feedback & overdue actions</p>
+            </div>
+          </div>
+          <div className="card-body">
+            {allCaughtUp ? (
+              <div className="attention-ok">All caught up. Nothing needs your attention right now.</div>
+            ) : (
+              needsAttention.filter((i) => i.count > 0).map((item) => (
+                <div key={item.label} className="attention-row">
+                  <span>{item.label}</span>
+                  <strong>{item.count}</strong>
+                </div>
+              ))
+            )}
+            {needsAttention.filter((i) => !i.count).map((item) => (
+              <div key={item.label} className="attention-row ok"><span>✓</span> {item.ok}</div>
+            ))}
+          </div>
         </section>
       </div>
 
-      <section className="card data-card" style={{ marginTop: 20 }}>
-        <div className="card-header"><div><h3>Panelist calibration</h3><p>How each panelist's average final rating compares to the overall average — useful for spotting consistently harsher or more lenient reviewers.</p></div></div>
-        <table>
-          <thead><tr><th>Panel member</th><th>Interviews</th><th>Average rating</th><th>Deviation from overall average</th></tr></thead>
-          <tbody>
-            {calibration.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No data yet.</td></tr>}
-            {calibration.map((row) => (
-              <tr key={row.panelMemberName}>
-                <td>{row.panelMemberName}</td>
-                <td>{row.interviewCount}</td>
-                <td>{row.averageFinalRating}</td>
-                <td style={{ color: row.deviationFromOverallAverage < 0 ? 'var(--r1)' : 'var(--r5)' }}>
-                  {row.deviationFromOverallAverage > 0 ? '+' : ''}{row.deviationFromOverallAverage}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      <div className="dashboard-columns" style={{ marginTop: 20 }}>
+        <section className="card data-card">
+          <div className="card-header">
+            <div>
+              <h3>Monthly Interviews</h3>
+              <p>Last {monthly.length} months · {totalThisPeriod} total interviews</p>
+            </div>
+          </div>
+          <div className="card-body">
+            <div className="bar-chart" role="img" aria-label="Interviews scheduled per month">
+              {monthly.map((m) => (
+                <div className="bar-chart-col" key={m.month}>
+                  <div className="bar-chart-bar" style={{ height: `${Math.max(4, (m.count / maxMonthly) * 120)}px` }} title={`${m.count} interviews`} />
+                  <span>{MONTH_LABEL(m.month)}</span>
+                </div>
+              ))}
+              {monthly.length === 0 && <div className="empty-state">No data yet.</div>}
+            </div>
+          </div>
+        </section>
+
+        <section className="card data-card">
+          <div className="card-header"><div><h3>Quick Summary</h3></div></div>
+          <div className="card-body">
+            <div className="attention-row"><span>Total this period</span><strong>{totalThisPeriod}</strong></div>
+            <div className="attention-row"><span>Avg per month</span><strong>{avgPerMonth}</strong></div>
+            <div className="attention-row"><span>Completion rate</span><strong>{completionRate}%</strong></div>
+            <div className="attention-row"><span>Pending review</span><strong>{summary ? summary.pendingFeedbackCount : 0}</strong></div>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

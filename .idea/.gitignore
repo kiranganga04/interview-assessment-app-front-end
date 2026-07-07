@@ -4,6 +4,7 @@ backend/uploads/
 *.class
 *.jar
 
+
 ## Frontend
 frontend/node_modules/
 frontend/dist/

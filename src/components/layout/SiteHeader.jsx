@@ -4,7 +4,10 @@ import { productName, productTagline } from '../../config/navigation';
 
 export default function SiteHeader({ auth, onLogout }) {
   const isAdmin = auth?.role === 'ADMIN';
-  const canManage = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER';
+  // Assessments (the full list/browse view) is ADMIN/RECRUITER only -- PANEL submits and manages
+  // their own assessments via "New assessment" but doesn't browse everyone else's. Kept in sync
+  // with the RoleRoute on /interviews in App.jsx and the @PreAuthorize on InterviewController.list().
+  const canBrowseAssessments = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER';
 
   return (
     <header className="site-header">
@@ -22,9 +25,8 @@ export default function SiteHeader({ auth, onLogout }) {
             {!auth && <NavLink to="/signin" className={({ isActive }) => isActive ? 'active' : ''}>Sign in</NavLink>}
             {!auth && <NavLink to="/signup" className={({ isActive }) => isActive ? 'active' : ''}>Sign up</NavLink>}
             {auth && <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink>}
-            {auth && <NavLink to="/interviews" className={({ isActive }) => isActive ? 'active' : ''}>Assessments</NavLink>}
-            {auth && canManage && <NavLink to="/interviews/new" className={({ isActive }) => isActive ? 'active' : ''}>New assessment</NavLink>}
-            {auth && isAdmin && <NavLink to="/skills" className={({ isActive }) => isActive ? 'active' : ''}>Skill catalog</NavLink>}
+            {auth && canBrowseAssessments && <NavLink to="/interviews" className={({ isActive }) => isActive ? 'active' : ''}>Assessments</NavLink>}
+            {auth && <NavLink to="/interviews/new" className={({ isActive }) => isActive ? 'active' : ''}>New assessment</NavLink>}
             {auth && isAdmin && <NavLink to="/users" className={({ isActive }) => isActive ? 'active' : ''}>Users</NavLink>}
             {auth && (
               <span className="nav-user" title={auth.email}>

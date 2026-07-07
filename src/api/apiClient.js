@@ -82,6 +82,26 @@ export const changeInterviewStatus = (id, status) =>
 
 export const deleteInterview = (id) => api.delete(`/interviews/${id}`);
 
+export const scheduleInterview = (payload) => api.post('/interviews/schedule', payload).then(r => r.data);
+
+// ---- Interviewers (People Management) ----
+export const listInterviewers = () => api.get('/interviewers').then(r => r.data);
+
+export const createInterviewer = (payload) => api.post('/interviewers', payload).then(r => r.data);
+
+export const updateInterviewer = (id, payload) => api.put(`/interviewers/${id}`, payload).then(r => r.data);
+
+export const deleteInterviewer = (id) => api.delete(`/interviewers/${id}`);
+
+// ---- Interview slots (Interview Management) ----
+export const listInterviewSlots = (params = {}) => api.get('/interview-slots', { params }).then(r => r.data);
+
+export const createInterviewSlot = (payload) => api.post('/interview-slots', payload).then(r => r.data);
+
+export const updateInterviewSlot = (id, payload) => api.put(`/interview-slots/${id}`, payload).then(r => r.data);
+
+export const cancelInterviewSlot = (id) => api.post(`/interview-slots/${id}/cancel`);
+
 // ---- Skill catalog (module 4) ----
 export const listActiveSkills = () => api.get('/skills').then(r => r.data);
 
@@ -122,5 +142,10 @@ export const getPassRateReport = () => api.get('/reports/pass-rate').then(r => r
 export const getSkillAverageReport = () => api.get('/reports/skill-averages').then(r => r.data);
 
 export const getPanelistCalibrationReport = () => api.get('/reports/panelist-calibration').then(r => r.data);
+
+export const getMonthlyInterviewsReport = (months = 6) =>
+  api.get('/reports/monthly-interviews', { params: { months } }).then(r => r.data);
+
+export const getTodaysAgenda = () => api.get('/reports/today-agenda').then(r => r.data);
 
 export default api;

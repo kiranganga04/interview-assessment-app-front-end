@@ -13,7 +13,7 @@ export const footerGroups = [
   },
   {
     title: 'Administration',
-    links: ['Skill catalog', 'User management']
+    links: ['User management']
   },
   {
     title: 'About',

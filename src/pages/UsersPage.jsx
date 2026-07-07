@@ -3,7 +3,7 @@ import { listUsers, createUser, updateUserRole } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
 
 const ROLES = ['ADMIN', 'RECRUITER', 'PANEL'];
-const EMPTY_FORM = { fullName: '', email: '', password: '', role: 'RECRUITER' };
+const EMPTY_FORM = { fullName: '', email: '', password: '', role: 'PANEL' };
 
 /** Module 2 (admin-only): manage recruiter/panel/admin accounts and deactivate access. */
 export default function UsersPage() {
