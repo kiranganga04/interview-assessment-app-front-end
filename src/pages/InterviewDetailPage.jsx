@@ -90,9 +90,13 @@ export default function InterviewDetailPage({ auth }) {
         <div className="card-body form-grid cols-3">
           <div><div className="eyebrow">Status</div><div><span className={`status-chip status-${(iv.status || '').toLowerCase()}`}>{(iv.status || '—').replace('_', ' ')}</span></div></div>
           <div><div className="eyebrow">Panel member</div><div>{iv.panelMemberName || '—'}</div></div>
-          <div><div className="eyebrow">Recruiter</div><div>{iv.recruiterName || '—'}</div></div>
+          <div><div className="eyebrow">Recruiter</div><div>{iv.recruiterName || '—'}{iv.recruiterEmail ? ` (${iv.recruiterEmail})` : ''}</div></div>
           <div><div className="eyebrow">Mode</div><div>{iv.modeOfInterview || '—'}</div></div>
           <div><div className="eyebrow">Interview date</div><div>{iv.interviewDate || '—'}</div></div>
+          <div>
+            <div className="eyebrow">Meeting link</div>
+            <div>{iv.meetingLink ? <a href={iv.meetingLink} target="_blank" rel="noreferrer">{iv.meetingLink}</a> : '—'}</div>
+          </div>
           <div><div className="eyebrow">Domain knowledge</div><div>{iv.domainKnowledge || '—'}</div></div>
           <div><div className="eyebrow">Communication</div><div><RatingBadge value={iv.communicationRating} /></div></div>
           <div><div className="eyebrow">Final rating</div><div><RatingBadge value={iv.finalRating} showLabel /></div></div>

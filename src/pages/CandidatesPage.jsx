@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { listCandidates, createCandidate, updateCandidate, deleteCandidate } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
 
-const EMPTY_FORM = { candidateName: '', mobileNumber: '', overallExperience: '', currentRole: '' };
+const EMPTY_FORM = { candidateName: '', email: '', mobileNumber: '', overallExperience: '', currentRole: '' };
 
 /**
  * People Management: simple candidate directory (list + add + edit + remove). Deliberately
@@ -46,6 +46,7 @@ export default function CandidatesPage() {
     setEditingId(candidate.candidateId);
     setEditForm({
       candidateName: candidate.candidateName || '',
+      email: candidate.email || '',
       mobileNumber: candidate.mobileNumber || '',
       overallExperience: candidate.overallExperience || '',
       currentRole: candidate.currentRole || ''
@@ -85,7 +86,7 @@ export default function CandidatesPage() {
         <div>
           <div className="eyebrow">People Management</div>
           <h1>Candidates</h1>
-          <p>The candidate directory that interviews and the Schedule Interview wizard are booked against.</p>
+          <p>The candidate directory that interviews and the Schedule Interview wizard are booked against. An email is required before a candidate can be scheduled, so they can receive the interview confirmation.</p>
         </div>
       </div>
 
@@ -94,6 +95,10 @@ export default function CandidatesPage() {
           <div className="field">
             <label>Candidate name</label>
             <input value={form.candidateName} onChange={(e) => setForm({ ...form, candidateName: e.target.value })} placeholder="e.g. Priya Nair" />
+          </div>
+          <div className="field">
+            <label>Email</label>
+            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="candidate@example.com" />
           </div>
           <div className="field">
             <label>Mobile</label>
@@ -120,37 +125,41 @@ export default function CandidatesPage() {
 
       {!loading && (
         <div className="card data-card">
-          <table>
-            <thead><tr><th>Name</th><th>Mobile</th><th>Experience</th><th>Current role</th><th></th></tr></thead>
-            <tbody>
-              {candidates.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No candidates yet.</td></tr>}
-              {candidates.map((c) => (
-                editingId === c.candidateId ? (
-                  <tr key={c.candidateId}>
-                    <td><input value={editForm.candidateName} onChange={(e) => setEditForm({ ...editForm, candidateName: e.target.value })} /></td>
-                    <td><input value={editForm.mobileNumber} onChange={(e) => setEditForm({ ...editForm, mobileNumber: e.target.value })} /></td>
-                    <td><input value={editForm.overallExperience} onChange={(e) => setEditForm({ ...editForm, overallExperience: e.target.value })} /></td>
-                    <td><input value={editForm.currentRole} onChange={(e) => setEditForm({ ...editForm, currentRole: e.target.value })} /></td>
-                    <td className="row-actions">
-                      <button className="btn btn-primary btn-sm" onClick={() => saveEdit(c.candidateId)}>Save</button>
-                      <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>Cancel</button>
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={c.candidateId}>
-                    <td><strong>{c.candidateName}</strong></td>
-                    <td>{c.mobileNumber || '-'}</td>
-                    <td>{c.overallExperience || '-'}</td>
-                    <td>{c.currentRole || '-'}</td>
-                    <td className="row-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => startEdit(c)}>Edit</button>
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--r1)' }} onClick={() => remove(c)}>Remove</button>
-                    </td>
-                  </tr>
-                )
-              ))}
-            </tbody>
-          </table>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Experience</th><th>Current role</th><th></th></tr></thead>
+              <tbody>
+                {candidates.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No candidates yet.</td></tr>}
+                {candidates.map((c) => (
+                  editingId === c.candidateId ? (
+                    <tr key={c.candidateId}>
+                      <td><input value={editForm.candidateName} onChange={(e) => setEditForm({ ...editForm, candidateName: e.target.value })} /></td>
+                      <td><input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} placeholder="candidate@example.com" /></td>
+                      <td><input value={editForm.mobileNumber} onChange={(e) => setEditForm({ ...editForm, mobileNumber: e.target.value })} /></td>
+                      <td><input value={editForm.overallExperience} onChange={(e) => setEditForm({ ...editForm, overallExperience: e.target.value })} /></td>
+                      <td><input value={editForm.currentRole} onChange={(e) => setEditForm({ ...editForm, currentRole: e.target.value })} /></td>
+                      <td className="row-actions">
+                        <button className="btn btn-primary btn-sm" onClick={() => saveEdit(c.candidateId)}>Save</button>
+                        <button className="btn btn-ghost btn-sm" onClick={cancelEdit}>Cancel</button>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={c.candidateId}>
+                      <td><strong>{c.candidateName}</strong></td>
+                      <td>{c.email || <span style={{ color: 'var(--r1)' }}>No email on file</span>}</td>
+                      <td>{c.mobileNumber || '-'}</td>
+                      <td>{c.overallExperience || '-'}</td>
+                      <td>{c.currentRole || '-'}</td>
+                      <td className="row-actions">
+                        <button className="btn btn-ghost btn-sm" onClick={() => startEdit(c)}>Edit</button>
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--r1)' }} onClick={() => remove(c)}>Remove</button>
+                      </td>
+                    </tr>
+                  )
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

@@ -110,27 +110,29 @@ export default function InterviewersPage() {
 
       {!loading && (
         <div className="card data-card">
-          <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Account</th><th>Grade</th><th>Level</th><th>Skills</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-              {interviewers.length === 0 && <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No interviewers yet.</td></tr>}
-              {interviewers.map((iv) => (
-                <tr key={iv.interviewerId}>
-                  <td><strong>{iv.fullName}</strong></td>
-                  <td>{iv.email}</td>
-                  <td>{iv.account || '-'}</td>
-                  <td>{iv.grade || '-'}</td>
-                  <td>{iv.levelCapability || '-'}</td>
-                  <td>{iv.skillSet || '-'}</td>
-                  <td><span className="pill">{iv.active ? 'Active' : 'Inactive'}</span></td>
-                  <td className="row-actions">
-                    <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(iv)}>{iv.active ? 'Deactivate' : 'Activate'}</button>
-                    <button className="btn btn-ghost btn-sm" style={{ color: 'var(--r1)' }} onClick={() => remove(iv)}>Remove</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Account</th><th>Grade</th><th>Level</th><th>Skills</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                {interviewers.length === 0 && <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No interviewers yet.</td></tr>}
+                {interviewers.map((iv) => (
+                  <tr key={iv.interviewerId}>
+                    <td><strong>{iv.fullName}</strong></td>
+                    <td>{iv.email}</td>
+                    <td>{iv.account || '-'}</td>
+                    <td>{iv.grade || '-'}</td>
+                    <td>{iv.levelCapability || '-'}</td>
+                    <td>{iv.skillSet || '-'}</td>
+                    <td><span className="pill">{iv.active ? 'Active' : 'Inactive'}</span></td>
+                    <td className="row-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(iv)}>{iv.active ? 'Deactivate' : 'Activate'}</button>
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--r1)' }} onClick={() => remove(iv)}>Remove</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

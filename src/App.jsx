@@ -13,18 +13,21 @@ import CandidatesPage from './pages/CandidatesPage';
 import InterviewersPage from './pages/InterviewersPage';
 import InterviewSlotsPage from './pages/InterviewSlotsPage';
 import ScheduleInterviewPage from './pages/ScheduleInterviewPage';
+import MyInterviewsPage from './pages/MyInterviewsPage';
 import { clearAuth, getStoredAuth, signOut } from './api/apiClient';
 import Sidebar from './components/layout/Sidebar';
 import TopBar from './components/layout/TopBar';
+import SiteHeader from './components/layout/SiteHeader';
 import SiteFooter from './components/layout/SiteFooter';
 import { ProtectedRoute, PublicOnlyRoute, RoleRoute } from './components/layout/RouteGuards';
 import { ToastProvider } from './components/layout/ToastProvider';
 
 /**
- * Module: sidebar shell replaces the old top-nav (SiteHeader.jsx -- now unused but left in
- * place, same treatment as SkillCatalogPage.jsx) for signed-in users. Signed-out/auth pages
- * intentionally render without the sidebar/topbar, matching the old header's behavior of
- * still showing on those pages minimally -- there is nothing to navigate to before sign-in.
+ * Module: sidebar shell replaces the old top-nav for signed-in users. Signed-out/auth pages
+ * (sign in, sign up, forgot/reset password) get their own minimal chrome instead: SiteHeader
+ * in its no-auth mode (brand + Sign in/Sign up links only, no dashboard nav) plus a compact
+ * SiteFooter -- enough to feel like part of the app without dragging in the full marketing
+ * footer/nav that only makes sense once someone is signed in.
  */
 export default function App() {
   const [auth, setAuth] = useState(() => getStoredAuth());
@@ -46,12 +49,15 @@ export default function App() {
       <Route path="/dashboard" element={<ProtectedRoute auth={auth}><DashboardPage /></ProtectedRoute>} />
       <Route path="/analytics" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><AnalyticsPage /></RoleRoute>} />
 
-      {/* PANEL can create/view/manage individual assessments, but not browse the full list -- see InterviewController.list() on the backend for the matching @PreAuthorize. */}
+      {/* PANEL manages individual assessments assigned to them (via My Interviews) and view/edit by id,
+          but doesn't browse the full list or free-create a new record -- see InterviewController.list()/
+          create() on the backend for the matching @PreAuthorize. */}
       <Route path="/interviews" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewListPage auth={auth} /></RoleRoute>} />
-      <Route path="/interviews/new" element={<ProtectedRoute auth={auth}><InterviewFormPage /></ProtectedRoute>} />
+      <Route path="/interviews/new" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewFormPage /></RoleRoute>} />
       <Route path="/interviews/schedule" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><ScheduleInterviewPage /></RoleRoute>} />
       <Route path="/interviews/:id" element={<ProtectedRoute auth={auth}><InterviewDetailPage auth={auth} /></ProtectedRoute>} />
       <Route path="/interviews/:id/edit" element={<ProtectedRoute auth={auth}><InterviewFormPage /></ProtectedRoute>} />
+      <Route path="/my-interviews" element={<RoleRoute auth={auth} roles={['PANEL']}><MyInterviewsPage /></RoleRoute>} />
 
       <Route path="/interview-slots" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewSlotsPage /></RoleRoute>} />
       <Route path="/interviewers" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewersPage /></RoleRoute>} />
@@ -67,8 +73,9 @@ export default function App() {
     return (
       <ToastProvider>
         <div className="app-shell">
+          <SiteHeader auth={null} />
           {routes}
-          <SiteFooter />
+          <SiteFooter compact />
         </div>
       </ToastProvider>
     );

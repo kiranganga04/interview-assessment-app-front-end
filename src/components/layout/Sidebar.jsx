@@ -12,6 +12,7 @@ import { productName } from '../../config/navigation';
 export default function Sidebar({ auth }) {
   const [collapsed, setCollapsed] = useState(false);
   const isAdmin = auth?.role === 'ADMIN';
+  const isPanel = auth?.role === 'PANEL';
   const canManageResourcing = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER';
   const canBrowseAssessments = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER';
 
@@ -43,7 +44,8 @@ export default function Sidebar({ auth }) {
       title: 'Feedback & Reports',
       items: [
         { to: '/interviews', label: 'Assessments', show: canBrowseAssessments },
-        { to: '/interviews/new', label: 'New assessment', show: true }
+        { to: '/interviews/new', label: 'New assessment', show: canBrowseAssessments },
+        { to: '/my-interviews', label: 'My Interviews', show: isPanel }
       ]
     },
     {

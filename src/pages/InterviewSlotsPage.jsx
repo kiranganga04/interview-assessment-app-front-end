@@ -132,31 +132,33 @@ export default function InterviewSlotsPage() {
 
       {!loading && (
         <div className="card data-card">
-          <table>
-            <thead><tr><th>Slot ID</th><th>Employee</th><th>Email</th><th>Contact</th><th>Skill set</th><th>Date</th><th>Time</th><th>Technology</th><th>Mode</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-              {slots.length === 0 && <tr><td colSpan={11} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No slots yet.</td></tr>}
-              {slots.map((slot) => (
-                <tr key={slot.slotId}>
-                  <td><span className="pill">{slot.slotCode}</span></td>
-                  <td>{slot.interviewerName}</td>
-                  <td>{slot.interviewerEmail}</td>
-                  <td>{slot.interviewerContact || '-'}</td>
-                  <td>{slot.technology || '-'}</td>
-                  <td>{slot.slotDate}</td>
-                  <td>{slot.startTime}–{slot.endTime}</td>
-                  <td>{slot.technology || '-'}</td>
-                  <td><span className="pill">{MODE_LABEL[slot.mode] || slot.mode}</span></td>
-                  <td><span className={`status-chip status-${(slot.status || '').toLowerCase()}`}>{slot.status}</span></td>
-                  <td className="row-actions">
-                    {slot.status === 'AVAILABLE' && (
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--r1)' }} onClick={() => cancel(slot)}>Cancel</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Slot ID</th><th>Employee</th><th>Email</th><th>Contact</th><th>Skill set</th><th>Date</th><th>Time</th><th>Technology</th><th>Mode</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                {slots.length === 0 && <tr><td colSpan={11} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No slots yet.</td></tr>}
+                {slots.map((slot) => (
+                  <tr key={slot.slotId}>
+                    <td><span className="pill">{slot.slotCode}</span></td>
+                    <td>{slot.interviewerName}</td>
+                    <td>{slot.interviewerEmail}</td>
+                    <td>{slot.interviewerContact || '-'}</td>
+                    <td>{slot.technology || '-'}</td>
+                    <td>{slot.slotDate}</td>
+                    <td>{slot.startTime}–{slot.endTime}</td>
+                    <td>{slot.technology || '-'}</td>
+                    <td><span className="pill">{MODE_LABEL[slot.mode] || slot.mode}</span></td>
+                    <td><span className={`status-chip status-${(slot.status || '').toLowerCase()}`}>{slot.status}</span></td>
+                    <td className="row-actions">
+                      {slot.status === 'AVAILABLE' && (
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--r1)' }} onClick={() => cancel(slot)}>Cancel</button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

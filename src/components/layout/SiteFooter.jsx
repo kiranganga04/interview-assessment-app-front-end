@@ -1,7 +1,27 @@
 import React from 'react';
 import { footerGroups, productName } from '../../config/navigation';
 
-export default function SiteFooter() {
+/**
+ * `compact` renders a slim single-row footer (brand + copyright only) instead of the full
+ * multi-column link farm -- used on signed-out/auth screens where a full sitemap-style footer
+ * doesn't apply yet (nothing links anywhere useful before you've signed in) and where keeping
+ * the page short matters so sign in/up doesn't require scrolling on ordinary screens.
+ */
+export default function SiteFooter({ compact = false }) {
+  if (compact) {
+    return (
+      <footer className="site-footer site-footer-compact">
+        <div className="footer-shell footer-shell-compact">
+          <div className="footer-mark">
+            <span className="mark">IA</span>
+            <strong>{productName}</strong>
+          </div>
+          <div className="footer-bottom">{productName} — internal hiring tool.</div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="site-footer">
       <div className="footer-shell">

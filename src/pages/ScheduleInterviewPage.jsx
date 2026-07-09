@@ -31,10 +31,12 @@ export default function ScheduleInterviewPage() {
   const [candidates, setCandidates] = useState([]);
   const [candidateId, setCandidateId] = useState('');
   const [newCandidateMode, setNewCandidateMode] = useState(false);
-  const [newCandidate, setNewCandidate] = useState({ candidateName: '', mobileNumber: '', overallExperience: '', currentRole: '' });
+  const [newCandidate, setNewCandidate] = useState({ candidateName: '', email: '', mobileNumber: '', overallExperience: '', currentRole: '' });
   const [levelOfInterview, setLevelOfInterview] = useState('L1');
   const [position, setPosition] = useState('');
   const [recruiterName, setRecruiterName] = useState('');
+  const [recruiterEmail, setRecruiterEmail] = useState('');
+  const [meetingLink, setMeetingLink] = useState('');
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -58,13 +60,25 @@ export default function ScheduleInterviewPage() {
   }, [slotDate]);
 
   const selectedSlot = useMemo(() => slots.find((s) => String(s.slotId) === String(slotId)), [slots, slotId]);
+  const selectedCandidate = useMemo(
+    () => candidates.find((c) => String(c.candidateId) === String(candidateId)),
+    [candidates, candidateId]
+  );
+  const isOnline = selectedSlot?.mode === 'VIRTUAL';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (!slotId) { setError('Please select a date and time slot.'); return; }
     if (!newCandidateMode && !candidateId) { setError('Please select a candidate.'); return; }
+    if (!newCandidateMode && candidateId && !selectedCandidate?.email) {
+      setError('This candidate doesn’t have an email on file yet. Add one from the Candidates page, or use "+ New candidate instead" to enter one now.');
+      return;
+    }
     if (newCandidateMode && !newCandidate.candidateName.trim()) { setError('Please enter the candidate name.'); return; }
+    if (newCandidateMode && !newCandidate.email.trim()) { setError('Please enter the candidate’s email so they can be notified.'); return; }
+    if (!recruiterEmail.trim()) { setError('Please enter the recruiter email.'); return; }
+    if (isOnline && !meetingLink.trim()) { setError('Please add a meeting link for this online interview.'); return; }
 
     setSaving(true);
     try {
@@ -78,9 +92,11 @@ export default function ScheduleInterviewPage() {
         slotId,
         levelOfInterview,
         position,
-        recruiterName
+        recruiterName,
+        recruiterEmail,
+        meetingLink
       });
-      toast.success('Interview scheduled.');
+      toast.success('Interview scheduled. Confirmation emails are on their way to the interviewer, candidate, and recruiter.');
       navigate(`/interviews/${interview.interviewId}`);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to schedule interview.');
@@ -159,6 +175,25 @@ export default function ScheduleInterviewPage() {
               <label>Recruiter name</label>
               <input value={recruiterName} onChange={(e) => setRecruiterName(e.target.value)} placeholder="Optional" />
             </div>
+            <div className="field">
+              <label>Recruiter email</label>
+              <input
+                type="email"
+                value={recruiterEmail}
+                onChange={(e) => setRecruiterEmail(e.target.value)}
+                placeholder="you@company.com"
+                required
+              />
+            </div>
+            <div className="field" style={{ gridColumn: 'span 2' }}>
+              <label>Meeting link{isOnline ? '' : ' (optional for this mode)'}</label>
+              <input
+                value={meetingLink}
+                onChange={(e) => setMeetingLink(e.target.value)}
+                placeholder="Paste your Zoom or Google Meet link"
+                required={isOnline}
+              />
+            </div>
           </div>
 
           <h3 style={{ margin: '20px 0 12px' }}>Candidate</h3>
@@ -168,8 +203,11 @@ export default function ScheduleInterviewPage() {
                 <label>Candidate</label>
                 <select value={candidateId} onChange={(e) => setCandidateId(e.target.value)}>
                   <option value="">Select candidate</option>
-                  {candidates.map((c) => <option key={c.candidateId} value={c.candidateId}>{c.candidateName}</option>)}
+                  {candidates.map((c) => <option key={c.candidateId} value={c.candidateId}>{c.candidateName}{c.email ? '' : ' (no email on file)'}</option>)}
                 </select>
+                {selectedCandidate && !selectedCandidate.email && (
+                  <small style={{ color: 'var(--r1)' }}>No email on file for this candidate — add one from the Candidates page before scheduling, or add a new candidate instead.</small>
+                )}
               </div>
               <div className="field" style={{ justifyContent: 'flex-end' }}>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => setNewCandidateMode(true)}>+ New candidate instead</button>
@@ -180,6 +218,16 @@ export default function ScheduleInterviewPage() {
               <div className="field">
                 <label>Candidate name</label>
                 <input value={newCandidate.candidateName} onChange={(e) => setNewCandidate({ ...newCandidate, candidateName: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Candidate email</label>
+                <input
+                  type="email"
+                  value={newCandidate.email}
+                  onChange={(e) => setNewCandidate({ ...newCandidate, email: e.target.value })}
+                  placeholder="candidate@example.com"
+                  required
+                />
               </div>
               <div className="field">
                 <label>Mobile</label>

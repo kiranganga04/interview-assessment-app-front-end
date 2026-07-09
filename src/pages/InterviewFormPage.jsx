@@ -39,6 +39,7 @@ export default function InterviewFormPage() {
   const toast = useToast();
 
   const [form, setForm] = useState(emptyForm);
+  const [candidateDisplayName, setCandidateDisplayName] = useState('');
   const [candidates, setCandidates] = useState([]);
   const [skillOptions, setSkillOptions] = useState([]);
   const [newCandidateMode, setNewCandidateMode] = useState(false);
@@ -72,6 +73,7 @@ export default function InterviewFormPage() {
           clientSkillAssessments: iv.clientSkillAssessments,
           codingRounds: iv.codingRounds
         });
+        setCandidateDisplayName(iv.candidateName || '');
       }).catch((e) => setError(e?.response?.data?.message || 'Failed to load record.'));
       listAttachments('INTERVIEW_SCREENSHOT', id).then(setScreenshotAttachments).catch(() => {});
     }
@@ -173,7 +175,14 @@ export default function InterviewFormPage() {
           <div className="card-body form-grid cols-3">
             <div className="field span-2">
               <label>Candidate</label>
-              {!newCandidateMode ? (
+              {isEdit ? (
+                <>
+                  <input value={candidateDisplayName} disabled />
+                  <small style={{ color: 'var(--ink-muted)' }}>
+                    The candidate is fixed once an interview is scheduled and can't be changed from this form.
+                  </small>
+                </>
+              ) : !newCandidateMode ? (
                 <select value={form.candidateId} onChange={(e) => setField('candidateId', e.target.value)} required>
                   <option value="">Select candidate…</option>
                   {candidates.map((c) => <option key={c.candidateId} value={c.candidateId}>{c.candidateName}</option>)}
@@ -187,9 +196,11 @@ export default function InterviewFormPage() {
                   <button type="button" className="btn btn-primary btn-sm" onClick={handleAddCandidate}>Save candidate</button>
                 </div>
               )}
-              <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', padding: '4px 0' }} onClick={() => setNewCandidateMode((v) => !v)}>
-                {newCandidateMode ? 'Cancel' : '+ New candidate'}
-              </button>
+              {!isEdit && (
+                <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', padding: '4px 0' }} onClick={() => setNewCandidateMode((v) => !v)}>
+                  {newCandidateMode ? 'Cancel' : '+ New candidate'}
+                </button>
+              )}
               {form.candidateId && !newCandidateMode && (
                 <div style={{ marginTop: 8 }}>
                   <label style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink-muted)' }}>Candidate resume (module 5)</label>

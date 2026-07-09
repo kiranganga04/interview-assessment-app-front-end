@@ -5,29 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="third commmit">
-      <change afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/assets/index-Bw7BWwti.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/assets/index-DZU_vVCJ.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/layout/TopBar.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/AnalyticsPage.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-DIPYu368.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-kwby39MC.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/assets/index-Bw7BWwti.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/assets/index-DZU_vVCJ.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/apiClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/apiClient.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/layout/RouteGuards.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/RouteGuards.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/layout/SiteHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/SiteHeader.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/navigation.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/navigation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/layout/SiteFooter.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/SiteFooter.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/DashboardPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/DashboardPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/UsersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/UsersPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/AuthPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AuthPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +72,15 @@
       <option name="presentableId" value="Default" />
       <updated>1783015068213</updated>
     </task>
+    <task id="LOCAL-00001" summary="third commmit">
+      <option name="closed" value="true" />
+      <created>1783438934995</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1783438934995</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

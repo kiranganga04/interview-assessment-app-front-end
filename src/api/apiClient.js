@@ -73,6 +73,9 @@ export const listInterviews = (params = {}) => api.get('/interviews', { params }
 
 export const getInterview = (id) => api.get(`/interviews/${id}`).then(r => r.data);
 
+// Feedback & Reports: a Panel member's own assigned candidates still awaiting feedback.
+export const listMyInterviews = () => api.get('/interviews/mine').then(r => r.data);
+
 export const createInterview = (payload) => api.post('/interviews', payload).then(r => r.data);
 
 export const updateInterview = (id, payload) => api.put(`/interviews/${id}`, payload).then(r => r.data);
