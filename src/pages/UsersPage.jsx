@@ -23,7 +23,10 @@ export default function UsersPage() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.fullName.trim() || !form.email.trim() || !form.password.trim()) return;
+    if (!form.fullName.trim() || !form.email.trim() || !form.password.trim()) {
+      toast.error('Full name, email, and a temporary password are all required.');
+      return;
+    }
     setCreating(true);
     try {
       await createUser(form);

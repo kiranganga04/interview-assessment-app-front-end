@@ -403,6 +403,15 @@ th {
   white-space: nowrap;
 }
 
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+th.sortable:hover {
+  color: var(--ink);
+}
+
 td {
   border-bottom: 1px solid var(--line);
   font-size: 14px;

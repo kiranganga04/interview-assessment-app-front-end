@@ -14,6 +14,8 @@ import InterviewersPage from './pages/InterviewersPage';
 import InterviewSlotsPage from './pages/InterviewSlotsPage';
 import ScheduleInterviewPage from './pages/ScheduleInterviewPage';
 import MyInterviewsPage from './pages/MyInterviewsPage';
+import TeamsPage from './pages/TeamsPage';
+import BulkImportSlotsPage from './pages/BulkImportSlotsPage';
 import { clearAuth, getStoredAuth, signOut } from './api/apiClient';
 import Sidebar from './components/layout/Sidebar';
 import TopBar from './components/layout/TopBar';
@@ -60,8 +62,10 @@ export default function App() {
       <Route path="/my-interviews" element={<RoleRoute auth={auth} roles={['PANEL']}><MyInterviewsPage /></RoleRoute>} />
 
       <Route path="/interview-slots" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewSlotsPage /></RoleRoute>} />
+      <Route path="/interview-slots/bulk-import" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><BulkImportSlotsPage /></RoleRoute>} />
       <Route path="/interviewers" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewersPage /></RoleRoute>} />
       <Route path="/candidates" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><CandidatesPage /></RoleRoute>} />
+      <Route path="/teams" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><TeamsPage /></RoleRoute>} />
 
       <Route path="/users" element={<RoleRoute auth={auth} roles={['ADMIN']}><UsersPage /></RoleRoute>} />
 

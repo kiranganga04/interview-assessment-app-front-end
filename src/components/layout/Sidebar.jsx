@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom';
 import { productName } from '../../config/navigation';
 
 /**
- * Left sidebar navigation, grouped like: Dashboard / Interview Management /
- * People Management / Feedback & Reports / Administration. Replaces the old top nav bar
+ * Left sidebar navigation, grouped like: Dashboard / People Management /
+ * Interview Management / Feedback & Reports / Administration. Replaces the old top nav bar
  * (SiteHeader.jsx, now unused) -- every route it links to already existed before this
  * redesign except the new Schedule Interview / Interview Slots / Interviewers / Candidates /
  * Analytics pages, so nothing that worked before is missing here, just regrouped.
@@ -25,19 +25,19 @@ export default function Sidebar({ auth }) {
       ]
     },
     {
-      title: 'Interview Management',
-      items: [
-        { to: '/interviews/schedule', label: 'Schedule Interview', show: canManageResourcing },
-        { to: '/interview-slots', label: 'Interview Slots', show: canManageResourcing },
-        { label: 'Bulk Import', show: canManageResourcing, soon: true }
-      ]
-    },
-    {
       title: 'People Management',
       items: [
         { to: '/candidates', label: 'Candidates', show: canManageResourcing },
         { to: '/interviewers', label: 'Interviewers', show: canManageResourcing },
-        { label: 'Teams', show: canManageResourcing, soon: true }
+        { to: '/teams', label: 'Teams', show: canManageResourcing }
+      ]
+    },
+    {
+      title: 'Interview Management',
+      items: [
+        { to: '/interview-slots', label: 'Interview Slots', show: canManageResourcing },
+        { to: '/interviews/schedule', label: 'Schedule Interview', show: canManageResourcing },
+        { to: '/interview-slots/bulk-import', label: 'Bulk Import', show: canManageResourcing }
       ]
     },
     {

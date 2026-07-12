@@ -1,28 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { listInterviewers, createInterviewer, updateInterviewer, deleteInterviewer } from '../api/apiClient';
+import { searchInterviewers, createInterviewer, updateInterviewer, deleteInterviewer } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
 
 const EMPTY_FORM = { fullName: '', email: '', contactNumber: '', account: '', grade: '', levelCapability: '', skillSet: '' };
+const PAGE_SIZE = 10;
 
-/** People Management (admin/recruiter-only): the bookable interviewer directory that Interview Slots hang off of. */
+/**
+ * People Management (admin/recruiter-only): the bookable interviewer directory that Interview
+ * Slots hang off of. Search/filter/sort/pagination are all server-side (page/size/sort +
+ * search/status query params against GET /api/interviewers/search), mirroring the same
+ * PageResponse pattern the Assessment records list already uses -- only one page of rows is
+ * ever transferred, and sorting is applied to the whole directory, not just the current page.
+ */
 export default function InterviewersPage() {
   const toast = useToast();
-  const [interviewers, setInterviewers] = useState([]);
+  const [pageData, setPageData] = useState({ content: [], page: 0, size: PAGE_SIZE, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [sortKey, setSortKey] = useState('fullName');
+  const [sortDir, setSortDir] = useState('asc');
+  const [page, setPage] = useState(0);
+
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+    setPage(0);
+  };
+  const sortArrow = (key) => (sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : '');
 
   const load = () => {
     setLoading(true);
-    listInterviewers().then(setInterviewers).catch((e) => setError(e?.response?.data?.message || 'Failed to load interviewers.')).finally(() => setLoading(false));
+    setError('');
+    const params = { page, size: PAGE_SIZE, sort: `${sortKey},${sortDir}` };
+    if (search.trim()) params.search = search.trim();
+    if (statusFilter !== 'ALL') params.status = statusFilter;
+    searchInterviewers(params)
+      .then(setPageData)
+      .catch((e) => setError(e?.response?.data?.message || 'Failed to load interviewers.'))
+      .finally(() => setLoading(false));
   };
 
-  useEffect(load, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(load, [page, search, statusFilter, sortKey, sortDir]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.fullName.trim() || !form.email.trim()) return;
+    if (!form.fullName.trim() || !form.email.trim()) {
+      toast.error('Full name and email are required.');
+      return;
+    }
     setSaving(true);
     try {
       await createInterviewer(form);
@@ -56,6 +90,9 @@ export default function InterviewersPage() {
       toast.error(err?.response?.data?.message || 'Failed to remove interviewer.');
     }
   };
+
+  const interviewers = pageData.content || [];
+  const hasActiveFilter = Boolean(search.trim()) || statusFilter !== 'ALL';
 
   return (
     <div className="page">
@@ -110,11 +147,42 @@ export default function InterviewersPage() {
 
       {!loading && (
         <div className="card data-card">
+          <div className="card-body form-grid cols-4" style={{ paddingBottom: 0 }}>
+            <div className="field" style={{ gridColumn: 'span 2' }}>
+              <label>Search</label>
+              <input value={search} onChange={(e) => { setPage(0); setSearch(e.target.value); }} placeholder="Search name, email, account, skills..." />
+            </div>
+            <div className="field">
+              <label>Status</label>
+              <select value={statusFilter} onChange={(e) => { setPage(0); setStatusFilter(e.target.value); }}>
+                <option value="ALL">All</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+          </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Email</th><th>Account</th><th>Grade</th><th>Level</th><th>Skills</th><th>Status</th><th></th></tr></thead>
+              <thead>
+                <tr>
+                  <th className="sortable" onClick={() => toggleSort('fullName')}>Name{sortArrow('fullName')}</th>
+                  <th className="sortable" onClick={() => toggleSort('email')}>Email{sortArrow('email')}</th>
+                  <th className="sortable" onClick={() => toggleSort('account')}>Account{sortArrow('account')}</th>
+                  <th className="sortable" onClick={() => toggleSort('grade')}>Grade{sortArrow('grade')}</th>
+                  <th className="sortable" onClick={() => toggleSort('levelCapability')}>Level{sortArrow('levelCapability')}</th>
+                  <th className="sortable" onClick={() => toggleSort('skillSet')}>Skills{sortArrow('skillSet')}</th>
+                  <th className="sortable" onClick={() => toggleSort('active')}>Status{sortArrow('active')}</th>
+                  <th></th>
+                </tr>
+              </thead>
               <tbody>
-                {interviewers.length === 0 && <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No interviewers yet.</td></tr>}
+                {interviewers.length === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>
+                      {hasActiveFilter ? 'No interviewers match your search/filter.' : 'No interviewers yet.'}
+                    </td>
+                  </tr>
+                )}
                 {interviewers.map((iv) => (
                   <tr key={iv.interviewerId}>
                     <td><strong>{iv.fullName}</strong></td>
@@ -133,6 +201,13 @@ export default function InterviewersPage() {
               </tbody>
             </table>
           </div>
+          {pageData.totalElements > 0 && (
+            <div className="pagination">
+              <button className="btn btn-ghost btn-sm" disabled={page <= 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>← Previous</button>
+              <span>Page {pageData.page + 1} of {Math.max(pageData.totalPages, 1)} · {pageData.totalElements} interviewer{pageData.totalElements !== 1 ? 's' : ''}</span>
+              <button className="btn btn-ghost btn-sm" disabled={page + 1 >= pageData.totalPages} onClick={() => setPage((p) => p + 1)}>Next →</button>
+            </div>
+          )}
         </div>
       )}
     </div>

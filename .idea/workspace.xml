@@ -4,23 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="third commmit">
+    <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="fourth commmit">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-Bw7BWwti.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-DZU_vVCJ.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/apiClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/apiClient.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/layout/SiteFooter.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/SiteFooter.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/AuthPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AuthPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/SkillCatalogPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/SkillCatalogPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/UsersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/UsersPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,11 +76,20 @@
       <option name="project" value="LOCAL" />
       <updated>1783438934995</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fourth commmit">
+      <option name="closed" value="true" />
+      <created>1783616082238</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1783616082238</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="third commmit" />
-    <option name="LAST_COMMIT_MESSAGE" value="third commmit" />
+    <MESSAGE value="fourth commmit" />
+    <option name="LAST_COMMIT_MESSAGE" value="fourth commmit" />
   </component>
 </project>

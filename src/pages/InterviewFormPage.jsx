@@ -82,7 +82,10 @@ export default function InterviewFormPage() {
   const setField = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   const handleAddCandidate = async () => {
-    if (!newCandidate.candidateName.trim()) return;
+    if (!newCandidate.candidateName.trim()) {
+      toast.error('Candidate name is required.');
+      return;
+    }
     const created = await createCandidate(newCandidate);
     setCandidates((c) => [...c, created]);
     setField('candidateId', created.candidateId);

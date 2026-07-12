@@ -19,7 +19,10 @@ export default function SkillCatalogPage() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) {
+      toast.error('Skill name is required.');
+      return;
+    }
     try {
       await createSkill(form);
       setForm({ name: '', applicableLevels: '' });

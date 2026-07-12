@@ -68,6 +68,10 @@ export const updateCandidate = (id, payload) => api.put(`/candidates/${id}`, pay
 
 export const deleteCandidate = (id) => api.delete(`/candidates/${id}`);
 
+// Candidates directory table (page/size/sort + search/emailFilter) -- separate from
+// listCandidates() above, which stays a plain unpaginated list for the candidate picker.
+export const searchCandidates = (params = {}) => api.get('/candidates/search', { params }).then(r => r.data);
+
 // ---- Interviews (module 8: paginated/filterable) ----
 export const listInterviews = (params = {}) => api.get('/interviews', { params }).then(r => r.data);
 
@@ -90,6 +94,11 @@ export const scheduleInterview = (payload) => api.post('/interviews/schedule', p
 // ---- Interviewers (People Management) ----
 export const listInterviewers = () => api.get('/interviewers').then(r => r.data);
 
+// Interviewers directory table (page/size/sort + search/status) -- separate from
+// listInterviewers() above, which stays the full-directory list for dropdowns (Add Slot
+// form, Teams view).
+export const searchInterviewers = (params = {}) => api.get('/interviewers/search', { params }).then(r => r.data);
+
 export const createInterviewer = (payload) => api.post('/interviewers', payload).then(r => r.data);
 
 export const updateInterviewer = (id, payload) => api.put(`/interviewers/${id}`, payload).then(r => r.data);
@@ -99,11 +108,19 @@ export const deleteInterviewer = (id) => api.delete(`/interviewers/${id}`);
 // ---- Interview slots (Interview Management) ----
 export const listInterviewSlots = (params = {}) => api.get('/interview-slots', { params }).then(r => r.data);
 
+// Interview Slots directory table (page/size/sort + search/status/mode) -- separate from
+// listInterviewSlots() above, which stays the unpaginated AVAILABLE-from-today list the
+// Schedule Interview wizard's slot picker needs in one call.
+export const searchInterviewSlots = (params = {}) => api.get('/interview-slots/search', { params }).then(r => r.data);
+
 export const createInterviewSlot = (payload) => api.post('/interview-slots', payload).then(r => r.data);
 
 export const updateInterviewSlot = (id, payload) => api.put(`/interview-slots/${id}`, payload).then(r => r.data);
 
 export const cancelInterviewSlot = (id) => api.post(`/interview-slots/${id}/cancel`);
+
+// Interview Management (Bulk Import): raw CSV text in, per-row created/error summary out.
+export const bulkImportInterviewSlots = (csv) => api.post('/interview-slots/bulk-import', { csv }).then(r => r.data);
 
 // ---- Skill catalog (module 4) ----
 export const listActiveSkills = () => api.get('/skills').then(r => r.data);
