@@ -4,19 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="fourth commmit">
+    <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="fifth commmit">
+      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/apiClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/apiClient.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/AnalyticsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AnalyticsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/DashboardPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/DashboardPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/SkillCatalogPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/SkillCatalogPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/UsersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/UsersPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,14 +56,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/91767/Downloads/interview-assessment-app/interview-assessment-app/frontend",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="" />
@@ -84,12 +102,29 @@
       <option name="project" value="LOCAL" />
       <updated>1783616082238</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fifth commmit">
+      <option name="closed" value="true" />
+      <created>1783862018285</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1783862018285</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="third commmit" />
     <MESSAGE value="fourth commmit" />
-    <option name="LAST_COMMIT_MESSAGE" value="fourth commmit" />
+    <MESSAGE value="fifth commmit" />
+    <option name="LAST_COMMIT_MESSAGE" value="fifth commmit" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

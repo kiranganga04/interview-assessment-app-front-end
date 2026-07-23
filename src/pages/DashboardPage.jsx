@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboardSummary, getTodaysAgenda, getMonthlyInterviewsReport } from '../api/apiClient';
+import { getDashboardSummary, getTodaysAgenda, getMonthlyInterviewsReport, downloadInterviewsCsv, saveBlob } from '../api/apiClient';
 
 const MONTH_LABEL = (key) => {
   const [year, month] = key.split('-');
@@ -9,10 +9,8 @@ const MONTH_LABEL = (key) => {
 
 /**
  * Dashboard Overview: stat tiles, Today's Agenda, Needs Attention, a lightweight Monthly
- * Interviews bar chart, and a Quick Summary panel. The deeper pass-rate/skill-average/
- * panelist-calibration tables that used to live here moved to the new Analytics page --
- * same data, same endpoints, just regrouped so this page can focus on "what's happening
- * right now" the way the reference dashboard does.
+ * Interviews bar chart, an outcome-category breakdown, and a Quick Summary panel. The deeper
+ * pass-rate/skill-average/panelist-calibration tables live on the Analytics page.
  */
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -31,12 +29,26 @@ export default function DashboardPage() {
       .catch((e) => setError(e?.response?.data?.message || 'Failed to load dashboard. (Reports are only available to Admin/Recruiter roles.)'));
   }, []);
 
+  const handleDownload = async () => {
+    try {
+      const blob = await downloadInterviewsCsv();
+      saveBlob(blob, 'interviews.csv');
+    } catch (e) {
+      setError('Could not download the interview list.');
+    }
+  };
+
   const maxMonthly = Math.max(1, ...monthly.map((m) => m.count));
   const totalThisPeriod = monthly.reduce((sum, m) => sum + m.count, 0);
   const avgPerMonth = monthly.length ? (totalThisPeriod / monthly.length).toFixed(1) : '0.0';
   const completionRate = summary && summary.totalInterviews
     ? Math.round((summary.completedCount / summary.totalInterviews) * 100)
     : 0;
+
+  // Outcome categories (mirrors the backend's Taken / Cancelled / Others buckets).
+  const taken = summary ? (summary.submittedCount + summary.completedCount) : 0;
+  const cancelledCat = summary ? summary.cancelledCount : 0;
+  const others = summary ? Math.max(0, summary.totalInterviews - taken - cancelledCat) : 0;
 
   const needsAttention = summary
     ? [
@@ -54,7 +66,10 @@ export default function DashboardPage() {
           <h1>Dashboard Overview</h1>
           <p>Live interview pipeline and enterprise metrics, at a glance.</p>
         </div>
-        <button className="btn btn-primary hero-action" onClick={() => navigate('/interviews')}>View assessments</button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn btn-secondary hero-action" onClick={handleDownload}>Download CSV</button>
+          <button className="btn btn-primary hero-action" onClick={() => navigate('/interviews')}>View assessments</button>
+        </div>
       </section>
 
       {error && <div className="error-banner">{error}</div>}
@@ -165,6 +180,7 @@ export default function DashboardPage() {
               <h3>Monthly Interviews</h3>
               <p>Last {monthly.length} months · {totalThisPeriod} total interviews</p>
             </div>
+            <button className="btn btn-secondary btn-sm" onClick={handleDownload}>Download CSV</button>
           </div>
           <div className="card-body">
             <div className="bar-chart" role="img" aria-label="Interviews scheduled per month">
@@ -179,6 +195,17 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        <section className="card data-card">
+          <div className="card-header"><div><h3>By category</h3><p>Outcome breakdown</p></div></div>
+          <div className="card-body">
+            <div className="attention-row"><span>Taken (submitted / recommended / closed)</span><strong>{taken}</strong></div>
+            <div className="attention-row"><span>Cancelled</span><strong>{cancelledCat}</strong></div>
+            <div className="attention-row"><span>Others (scheduled / in progress)</span><strong>{others}</strong></div>
+          </div>
+        </section>
+      </div>
+
+      <div className="dashboard-columns" style={{ marginTop: 20 }}>
         <section className="card data-card">
           <div className="card-header"><div><h3>Quick Summary</h3></div></div>
           <div className="card-body">

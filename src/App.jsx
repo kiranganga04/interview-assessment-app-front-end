@@ -6,7 +6,8 @@ import InterviewDetailPage from './pages/InterviewDetailPage';
 import AuthPage from './pages/AuthPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import DashboardPage from './pages/DashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import RecruiterDashboardPage from './pages/RecruiterDashboardPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import UsersPage from './pages/UsersPage';
 import CandidatesPage from './pages/CandidatesPage';
@@ -14,6 +15,8 @@ import InterviewersPage from './pages/InterviewersPage';
 import InterviewSlotsPage from './pages/InterviewSlotsPage';
 import ScheduleInterviewPage from './pages/ScheduleInterviewPage';
 import MyInterviewsPage from './pages/MyInterviewsPage';
+import MyInterviewHistoryPage from './pages/MyInterviewHistoryPage';
+import PanelDashboardPage from './pages/PanelDashboardPage';
 import TeamsPage from './pages/TeamsPage';
 import BulkImportSlotsPage from './pages/BulkImportSlotsPage';
 import { clearAuth, getStoredAuth, signOut } from './api/apiClient';
@@ -48,7 +51,23 @@ export default function App() {
       <Route path="/forgot-password" element={<PublicOnlyRoute auth={auth}><ForgotPasswordPage /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<PublicOnlyRoute auth={auth}><ResetPasswordPage /></PublicOnlyRoute>} />
 
-      <Route path="/dashboard" element={<ProtectedRoute auth={auth}><DashboardPage /></ProtectedRoute>} />
+      {/* Each role gets its own Dashboard Overview, routed here:
+          PANEL   → personal dashboard built from their own interviews (PanelDashboardPage)
+          RECRUITER → operational "my pipeline" dashboard (RecruiterDashboardPage)
+          ADMIN   → org-wide governance dashboard (AdminDashboardPage)
+          All three read RBAC-scoped report endpoints, so each sees only the data they're allowed to. */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute auth={auth}>
+            {auth?.role === 'PANEL'
+              ? <PanelDashboardPage />
+              : auth?.role === 'ADMIN'
+                ? <AdminDashboardPage />
+                : <RecruiterDashboardPage />}
+          </ProtectedRoute>
+        }
+      />
       <Route path="/analytics" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><AnalyticsPage /></RoleRoute>} />
 
       {/* PANEL manages individual assessments assigned to them (via My Interviews) and view/edit by id,
@@ -60,6 +79,7 @@ export default function App() {
       <Route path="/interviews/:id" element={<ProtectedRoute auth={auth}><InterviewDetailPage auth={auth} /></ProtectedRoute>} />
       <Route path="/interviews/:id/edit" element={<ProtectedRoute auth={auth}><InterviewFormPage /></ProtectedRoute>} />
       <Route path="/my-interviews" element={<RoleRoute auth={auth} roles={['PANEL']}><MyInterviewsPage /></RoleRoute>} />
+      <Route path="/my-interview-history" element={<RoleRoute auth={auth} roles={['PANEL']}><MyInterviewHistoryPage /></RoleRoute>} />
 
       <Route path="/interview-slots" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><InterviewSlotsPage /></RoleRoute>} />
       <Route path="/interview-slots/bulk-import" element={<RoleRoute auth={auth} roles={['ADMIN', 'RECRUITER']}><BulkImportSlotsPage /></RoleRoute>} />

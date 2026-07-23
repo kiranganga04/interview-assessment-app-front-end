@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getInterview, changeInterviewStatus, listAttachments, attachmentDownloadHref } from '../api/apiClient';
+import { getInterview, changeInterviewStatus, rescheduleInterview, listAttachments, attachmentDownloadHref } from '../api/apiClient';
 import RatingBadge from '../components/RatingBadge';
 import { useToast } from '../components/layout/ToastProvider';
 
@@ -48,7 +48,15 @@ export default function InterviewDetailPage({ auth }) {
   const [iv, setIv] = useState(null);
   const [attachments, setAttachments] = useState([]);
   const [error, setError] = useState('');
-  const canManage = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER' || auth?.role === 'PANEL';
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [newWhen, setNewWhen] = useState('');
+  const [newLink, setNewLink] = useState('');
+  const [busy, setBusy] = useState(false);
+  const isPanel = auth?.role === 'PANEL';
+  // Panel can open the feedback form; the interview lifecycle (status / reschedule / cancel) is
+  // recruiter/admin only.
+  const canManage = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER' || isPanel;
+  const canManageLifecycle = auth?.role === 'ADMIN' || auth?.role === 'RECRUITER';
 
   const load = () => {
     getInterview(id).then(setIv).catch((e) => setError(e?.response?.data?.message || 'Failed to load record.'));
@@ -67,10 +75,48 @@ export default function InterviewDetailPage({ auth }) {
     }
   };
 
+  const handleCancel = () => {
+    if (!window.confirm('Cancel this interview? The candidate, interviewer and recruiter will be notified.')) return;
+    handleStatusChange('CANCELLED');
+  };
+
+  const openReschedule = () => {
+    setNewWhen(iv.scheduledAt ? String(iv.scheduledAt).slice(0, 16) : '');
+    setNewLink(iv.meetingLink || '');
+    setShowReschedule(true);
+  };
+
+  const submitReschedule = async () => {
+    if (!newWhen) {
+      toast.error('Please pick a new date & time.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const updated = await rescheduleInterview(id, { scheduledAt: newWhen, meetingLink: newLink || undefined });
+      setIv(updated);
+      setShowReschedule(false);
+      toast.success('Interview rescheduled. The candidate, interviewer and recruiter have been notified.');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not reschedule the interview.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (error) return <div className="page"><div className="error-banner">{error}</div></div>;
   if (!iv) return <div className="loading">Loading…</div>;
 
   const nextStatuses = NEXT_STATUS[iv.status] || [];
+  const canReschedule = canManageLifecycle && iv.status !== 'CANCELLED' && iv.status !== 'CLOSED';
+  const canCancel = canManageLifecycle && (iv.status === 'SCHEDULED' || iv.status === 'IN_PROGRESS');
+
+  // The rating / coding sections are OUTCOMES of the interview -- only show them once they have
+  // content, so a not-yet-conducted (SCHEDULED) interview doesn't display three empty tables.
+  const hasInternal = (iv.internalSkillAssessments || []).length > 0;
+  const hasCoding = (iv.codingRounds || []).length > 0;
+  const hasClient = (iv.clientSkillAssessments || []).length > 0;
+  const hasAnyFeedback = hasInternal || hasCoding || hasClient || !!iv.overallAssessment;
 
   return (
     <div className="page">
@@ -81,7 +127,11 @@ export default function InterviewDetailPage({ auth }) {
           <p>{iv.currentRole || 'Role not specified'} · {iv.overallExperience || '—'} yrs experience</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          {canManage && <button className="btn btn-secondary" onClick={() => navigate(`/interviews/${id}/edit`)}>Edit</button>}
+          {canManage && (
+            <button className="btn btn-secondary" onClick={() => navigate(`/interviews/${id}/edit`)}>
+              {isPanel ? 'Add feedback' : 'Edit'}
+            </button>
+          )}
           <button className="btn btn-ghost" onClick={() => navigate('/interviews')}>Back to list</button>
         </div>
       </div>
@@ -92,7 +142,7 @@ export default function InterviewDetailPage({ auth }) {
           <div><div className="eyebrow">Panel member</div><div>{iv.panelMemberName || '—'}</div></div>
           <div><div className="eyebrow">Recruiter</div><div>{iv.recruiterName || '—'}{iv.recruiterEmail ? ` (${iv.recruiterEmail})` : ''}</div></div>
           <div><div className="eyebrow">Mode</div><div>{iv.modeOfInterview || '—'}</div></div>
-          <div><div className="eyebrow">Interview date</div><div>{iv.interviewDate || '—'}</div></div>
+          <div><div className="eyebrow">Scheduled at</div><div>{iv.scheduledAt ? String(iv.scheduledAt).replace('T', ' ').slice(0, 16) : (iv.interviewDate || '—')}</div></div>
           <div>
             <div className="eyebrow">Meeting link</div>
             <div>{iv.meetingLink ? <a href={iv.meetingLink} target="_blank" rel="noreferrer">{iv.meetingLink}</a> : '—'}</div>
@@ -103,17 +153,67 @@ export default function InterviewDetailPage({ auth }) {
           <div><div className="eyebrow">Recommendation</div><div><span className="pill">{iv.panelRecommendation || '—'}</span></div></div>
         </div>
 
-        {canManage && nextStatuses.length > 0 && (
-          <div className="card-body" style={{ borderTop: '1px solid var(--line)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ color: 'var(--ink-muted)', fontSize: 12.5, fontWeight: 700, alignSelf: 'center' }}>Move to:</span>
-            {nextStatuses.map((s) => (
-              <button key={s} type="button" className="btn btn-secondary btn-sm" onClick={() => handleStatusChange(s)}>
-                {s.replace('_', ' ')}
+        {canManageLifecycle && (nextStatuses.length > 0 || canReschedule || canCancel) && (
+          <div className="card-body" style={{ borderTop: '1px solid var(--line)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            {nextStatuses.length > 0 && (
+              <>
+                <span style={{ color: 'var(--ink-muted)', fontSize: 12.5, fontWeight: 700 }}>Move to:</span>
+                {nextStatuses.map((s) => (
+                  <button key={s} type="button" className="btn btn-secondary btn-sm" onClick={() => handleStatusChange(s)}>
+                    {s.replace('_', ' ')}
+                  </button>
+                ))}
+                <span style={{ width: 1, alignSelf: 'stretch', background: 'var(--line)', margin: '0 4px' }} />
+              </>
+            )}
+            {canReschedule && (
+              <button type="button" className="btn btn-secondary btn-sm" onClick={openReschedule}>Reschedule</button>
+            )}
+            {canCancel && (
+              <button type="button" className="btn btn-secondary btn-sm" style={{ color: '#b91c1c' }} onClick={handleCancel}>
+                Cancel interview
               </button>
-            ))}
+            )}
+          </div>
+        )}
+
+        {showReschedule && (
+          <div className="card-body" style={{ borderTop: '1px solid var(--line)' }}>
+            <div className="eyebrow" style={{ marginBottom: 10 }}>Reschedule interview</div>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12.5, color: 'var(--ink-muted)', fontWeight: 700, gap: 4 }}>
+                New date & time
+                <input type="datetime-local" value={newWhen} onChange={(e) => setNewWhen(e.target.value)} className="input" style={{ minWidth: 220 }} />
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12.5, color: 'var(--ink-muted)', fontWeight: 700, gap: 4, flex: 1, minWidth: 240 }}>
+                Meeting link (optional)
+                <input type="url" value={newLink} onChange={(e) => setNewLink(e.target.value)} className="input" placeholder="https://…" />
+              </label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" className="btn btn-primary btn-sm" onClick={submitReschedule} disabled={busy}>
+                  {busy ? 'Saving…' : 'Save & notify'}
+                </button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowReschedule(false)} disabled={busy}>Cancel</button>
+              </div>
+            </div>
           </div>
         )}
       </div>
+
+      {!hasAnyFeedback && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div className="card-body empty-state">
+            {iv.status === 'SCHEDULED' && (
+              <div>This interview hasn't taken place yet. Panel ratings, coding details and the recommendation
+                will appear here once the panel submits their feedback.</div>
+            )}
+            {iv.status === 'CANCELLED' && <div>This interview was cancelled, so no feedback was recorded.</div>}
+            {iv.status !== 'SCHEDULED' && iv.status !== 'CANCELLED' && (
+              <div>No ratings have been recorded for this interview yet.</div>
+            )}
+          </div>
+        </div>
+      )}
 
       {iv.overallAssessment && (
         <div className="card" style={{ marginBottom: 20 }}>
@@ -122,31 +222,32 @@ export default function InterviewDetailPage({ auth }) {
         </div>
       )}
 
-      <SkillTable title="Panel skill ratings" rows={iv.internalSkillAssessments} showSelf />
+      {hasInternal && <SkillTable title="Panel skill ratings" rows={iv.internalSkillAssessments} showSelf />}
 
-      <div className="card" style={{ marginBottom: 20, overflowX: 'auto' }}>
-        <div className="card-header"><h3>Coding details</h3></div>
-        <table>
-          <thead>
-            <tr><th>Skill</th><th># Questions</th><th>Time (mins)</th><th>Complexity</th><th>Status</th><th>Remarks</th></tr>
-          </thead>
-          <tbody>
-            {iv.codingRounds.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>None recorded.</td></tr>}
-            {iv.codingRounds.map((c) => (
-              <tr key={c.codingRoundId}>
-                <td>{c.skill}</td>
-                <td>{c.noOfQuestions}</td>
-                <td>{c.timeTakenMins}</td>
-                <td>{c.testComplexity}</td>
-                <td>{c.codingStatus}</td>
-                <td>{c.remarks || '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {hasCoding && (
+        <div className="card" style={{ marginBottom: 20, overflowX: 'auto' }}>
+          <div className="card-header"><h3>Coding details</h3></div>
+          <table>
+            <thead>
+              <tr><th>Skill</th><th># Questions</th><th>Time (mins)</th><th>Complexity</th><th>Status</th><th>Remarks</th></tr>
+            </thead>
+            <tbody>
+              {iv.codingRounds.map((c) => (
+                <tr key={c.codingRoundId}>
+                  <td>{c.skill}</td>
+                  <td>{c.noOfQuestions}</td>
+                  <td>{c.timeTakenMins}</td>
+                  <td>{c.testComplexity}</td>
+                  <td>{c.codingStatus}</td>
+                  <td>{c.remarks || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <SkillTable title="Client technical panel ratings" rows={iv.clientSkillAssessments} showSelf={false} />
+      {hasClient && <SkillTable title="Client technical panel ratings" rows={iv.clientSkillAssessments} showSelf={false} />}
 
       {(attachments.length > 0 || iv.interviewScreenshotUrl) && (
         <div className="card" style={{ marginBottom: 20 }}>

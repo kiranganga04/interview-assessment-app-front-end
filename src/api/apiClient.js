@@ -80,12 +80,23 @@ export const getInterview = (id) => api.get(`/interviews/${id}`).then(r => r.dat
 // Feedback & Reports: a Panel member's own assigned candidates still awaiting feedback.
 export const listMyInterviews = () => api.get('/interviews/mine').then(r => r.data);
 
+// Feedback & Reports: a Panel member's full interview history (all statuses), most recent first.
+export const listMyInterviewHistory = () => api.get('/interviews/mine/history').then(r => r.data);
+
 export const createInterview = (payload) => api.post('/interviews', payload).then(r => r.data);
 
 export const updateInterview = (id, payload) => api.put(`/interviews/${id}`, payload).then(r => r.data);
 
+// Panel feedback submission: saves the assessment + moves it to SUBMITTED + notifies the recruiter.
+export const submitInterviewFeedback = (id, payload) =>
+  api.post(`/interviews/${id}/submit-feedback`, payload).then(r => r.data);
+
 export const changeInterviewStatus = (id, status) =>
   api.patch(`/interviews/${id}/status`, { status }).then(r => r.data);
+
+// Explicit reschedule: { scheduledAt: 'YYYY-MM-DDTHH:mm', meetingLink?, reason? }
+export const rescheduleInterview = (id, payload) =>
+  api.patch(`/interviews/${id}/reschedule`, payload).then(r => r.data);
 
 export const deleteInterview = (id) => api.delete(`/interviews/${id}`);
 
@@ -166,6 +177,30 @@ export const getPanelistCalibrationReport = () => api.get('/reports/panelist-cal
 export const getMonthlyInterviewsReport = (months = 6) =>
   api.get('/reports/monthly-interviews', { params: { months } }).then(r => r.data);
 
+// Admin dashboard (governance) — ADMIN-only endpoints. These are additive: the Admin dashboard
+// calls them with a .catch() fallback so it still renders if the backend phase isn't deployed yet.
+// [{ recruiterEmail, name, activeCount, totalCount }]
+export const getRecruiterWorkload = () => api.get('/reports/admin/recruiter-workload').then(r => r.data);
+
+// { orphanedInterviews, interviewersWithoutUser, activeSkillCount }
+export const getDataHygiene = () => api.get('/reports/admin/data-hygiene').then(r => r.data);
+
 export const getTodaysAgenda = () => api.get('/reports/today-agenda').then(r => r.data);
+
+// Downloads the caller's scoped interview list as a CSV Blob. Optional month = 'YYYY-MM'.
+export const downloadInterviewsCsv = (month) =>
+  api.get('/reports/export', { params: month ? { month } : {}, responseType: 'blob' }).then(r => r.data);
+
+// Helper: turn a Blob into a browser file download.
+export const saveBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
 
 export default api;

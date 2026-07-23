@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getPassRateReport, getSkillAverageReport, getPanelistCalibrationReport } from '../api/apiClient';
+import { StatCard, CardHeader } from '../components/DashboardUI';
 
 /**
- * Module 7: pass-rate / skill-average / panelist-calibration tables. This is the analytical
- * content that used to live directly on the Dashboard page -- relocated here under its own
- * "Analytics" nav entry when the Dashboard was split into a stat-tile Overview page plus this
- * deeper-dive page, so none of the existing reporting is lost, just regrouped.
+ * Analytics (ADMIN / RECRUITER) — deeper-dive reporting on the shared editorial theme (.dash-b):
+ * a KPI strip plus three visual reports (pass-rate bars, skill-rating bars, and a diverging
+ * panelist-calibration chart) instead of plain tables.
  */
 export default function AnalyticsPage() {
   const [passRate, setPassRate] = useState([]);
@@ -23,73 +23,98 @@ export default function AnalyticsPage() {
       .catch((e) => setError(e?.response?.data?.message || 'Failed to load analytics. (Reports are only available to Admin/Recruiter roles.)'));
   }, []);
 
+  const kpis = useMemo(() => {
+    const totTotal = passRate.reduce((s, r) => s + (r.total || 0), 0);
+    const totRec = passRate.reduce((s, r) => s + (r.recommended || 0), 0);
+    const overallPass = totTotal ? Math.round((totRec / totTotal) * 100) : 0;
+    const ratings = skillAverages.reduce((s, r) => s + (r.ratingCount || 0), 0);
+    const weighted = skillAverages.reduce((s, r) => s + (Number(r.averageRating) || 0) * (r.ratingCount || 0), 0);
+    const avgSkill = ratings ? (weighted / ratings) : 0;
+    return { overallPass, avgSkill, ratings, panelists: calibration.length };
+  }, [passRate, skillAverages, calibration]);
+
+  const skillMax = Math.max(5, ...skillAverages.map((r) => Number(r.averageRating) || 0));
+  const calMaxAbs = Math.max(0.5, ...calibration.map((r) => Math.abs(Number(r.deviationFromOverallAverage) || 0)));
+  const calSorted = useMemo(
+    () => [...calibration].sort((a, b) => Math.abs(b.deviationFromOverallAverage) - Math.abs(a.deviationFromOverallAverage)),
+    [calibration]
+  );
+
   return (
-    <main className="page">
+    <main className="page dash-b">
       <section className="dashboard-hero">
         <div>
           <div className="eyebrow">Interview Assessment System</div>
           <h1>Analytics</h1>
-          <p>Deeper-dive reporting: pass rates by level, skill averages, and panelist calibration.</p>
+          <p>Pass rates by level, average ratings by skill, and panelist calibration — where your panel is generous, where it's tough, and where candidates clear the bar.</p>
         </div>
       </section>
 
       {error && <div className="error-banner">{error}</div>}
 
+      <section className="stat-grid" aria-label="Analytics summary">
+        <StatCard label="Overall pass rate" value={`${kpis.overallPass}%`} sub="Recommended ÷ total" />
+        <StatCard label="Avg skill rating" value={kpis.avgSkill ? kpis.avgSkill.toFixed(1) : '—'} sub="Weighted, out of 5" />
+        <StatCard label="Ratings recorded" value={kpis.ratings} sub="Internal panel ratings" />
+        <StatCard label="Panelists tracked" value={kpis.panelists} sub="With calibration data" />
+      </section>
+
       <div className="dashboard-columns">
         <section className="card data-card">
-          <div className="card-header"><div><h3>Pass rate by level</h3><p>Share of interviews recommended, per level</p></div></div>
-          <table>
-            <thead><tr><th>Level</th><th>Total</th><th>Recommended</th><th>Pass rate</th></tr></thead>
-            <tbody>
-              {passRate.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No data yet.</td></tr>}
-              {passRate.map((row) => (
-                <tr key={row.level}>
-                  <td><span className="pill">{row.level}</span></td>
-                  <td>{row.total}</td>
-                  <td>{row.recommended}</td>
-                  <td>{row.passRatePercent}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <CardHeader title="Pass rate by level" subtitle="Share of interviews recommended, per level" />
+          <div className="card-body">
+            {passRate.length === 0 && <div className="empty-state"><div>No data yet.</div></div>}
+            {passRate.map((row) => (
+              <div className="meter-row" key={row.level}>
+                <span className="meter-label"><span className="pill">{row.level}</span></span>
+                <div className="meter-track"><div className="meter-fill" style={{ width: `${Math.max(2, row.passRatePercent)}%` }} /></div>
+                <span className="meter-val">{row.passRatePercent}% <small>({row.recommended}/{row.total})</small></span>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="card data-card">
-          <div className="card-header"><div><h3>Average rating by skill</h3><p>Internal panel ratings only</p></div></div>
-          <table>
-            <thead><tr><th>Skill</th><th>Average</th><th>Ratings</th></tr></thead>
-            <tbody>
-              {skillAverages.length === 0 && <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No data yet.</td></tr>}
-              {skillAverages.map((row) => (
-                <tr key={row.skillName}>
-                  <td>{row.skillName}</td>
-                  <td>{row.averageRating}</td>
-                  <td>{row.ratingCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <CardHeader title="Average rating by skill" subtitle="Internal panel ratings only" />
+          <div className="card-body">
+            {skillAverages.length === 0 && <div className="empty-state"><div>No data yet.</div></div>}
+            {skillAverages.map((row) => (
+              <div className="meter-row" key={row.skillName}>
+                <span className="meter-label">{row.skillName}</span>
+                <div className="meter-track"><div className="meter-fill" style={{ width: `${Math.max(2, ((Number(row.averageRating) || 0) / skillMax) * 100)}%` }} /></div>
+                <span className="meter-val">{row.averageRating} <small>/5 · {row.ratingCount}</small></span>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
 
-      <section className="card data-card" style={{ marginTop: 20 }}>
-        <div className="card-header"><div><h3>Panelist calibration</h3><p>How each panelist's average final rating compares to the overall average — useful for spotting consistently harsher or more lenient reviewers.</p></div></div>
-        <table>
-          <thead><tr><th>Panel member</th><th>Interviews</th><th>Average rating</th><th>Deviation from overall average</th></tr></thead>
-          <tbody>
-            {calibration.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No data yet.</td></tr>}
-            {calibration.map((row) => (
-              <tr key={row.panelMemberName}>
-                <td>{row.panelMemberName}</td>
-                <td>{row.interviewCount}</td>
-                <td>{row.averageFinalRating}</td>
-                <td style={{ color: row.deviationFromOverallAverage < 0 ? 'var(--r1)' : 'var(--r5)' }}>
-                  {row.deviationFromOverallAverage > 0 ? '+' : ''}{row.deviationFromOverallAverage}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <section className="card data-card" style={{ marginTop: 18 }}>
+        <CardHeader
+          title="Panelist calibration"
+          subtitle="How each panelist's average final rating compares to the overall average — left of centre is tougher, right is more lenient."
+        />
+        <div className="card-body">
+          {calSorted.length === 0 && <div className="empty-state"><div>No data yet.</div></div>}
+          {calSorted.map((row) => {
+            const dev = Number(row.deviationFromOverallAverage) || 0;
+            const harsh = dev < 0;
+            const w = Math.min(50, (Math.abs(dev) / calMaxAbs) * 50);
+            const fillStyle = harsh
+              ? { left: `${50 - w}%`, width: `${w}%`, background: 'var(--r1)' }
+              : { left: '50%', width: `${w}%`, background: 'var(--r5)' };
+            return (
+              <div className="cal-row" key={row.panelMemberName}>
+                <span className="cal-name">{row.panelMemberName}<small>{row.interviewCount} interviews · avg {row.averageFinalRating}</small></span>
+                <div className="cal-track">
+                  <div className="cal-center" />
+                  <div className="cal-fill" style={fillStyle} />
+                </div>
+                <span className="cal-val" style={{ color: harsh ? 'var(--r1)' : 'var(--r5)' }}>{dev > 0 ? '+' : ''}{dev}</span>
+              </div>
+            );
+          })}
+        </div>
       </section>
     </main>
   );

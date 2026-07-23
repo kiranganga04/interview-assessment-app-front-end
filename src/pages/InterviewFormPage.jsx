@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   listCandidates, createCandidate,
-  getInterview, createInterview, updateInterview,
+  getInterview, createInterview, updateInterview, submitInterviewFeedback,
   listActiveSkills, uploadFile, listAttachments, attachmentDownloadHref
 } from '../api/apiClient';
 import SkillAssessmentTable from '../components/SkillAssessmentTable';
@@ -123,6 +123,26 @@ export default function InterviewFormPage() {
     }
   };
 
+  // Shared payload builder so a plain save and a feedback submission send exactly the same shape.
+  const buildPayload = () => ({
+    ...form,
+    candidateId: Number(form.candidateId),
+    communicationRating: form.communicationRating === '' ? null : Number(form.communicationRating),
+    finalRating: form.finalRating === '' ? null : Number(form.finalRating),
+    scheduledAt: form.scheduledAt || null,
+    internalSkillAssessments: form.internalSkillAssessments.map((s) => ({
+      ...s, selfRating: s.selfRating === '' ? null : Number(s.selfRating), rating: s.rating === '' ? null : Number(s.rating)
+    })),
+    clientSkillAssessments: form.clientSkillAssessments.map((s) => ({
+      ...s, selfRating: s.selfRating === '' ? null : Number(s.selfRating), rating: s.rating === '' ? null : Number(s.rating)
+    })),
+    codingRounds: form.codingRounds.map((c) => ({
+      ...c,
+      noOfQuestions: c.noOfQuestions === '' ? null : Number(c.noOfQuestions),
+      timeTakenMins: c.timeTakenMins === '' ? null : Number(c.timeTakenMins)
+    }))
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -131,30 +151,34 @@ export default function InterviewFormPage() {
       return;
     }
     setSaving(true);
-    const payload = {
-      ...form,
-      candidateId: Number(form.candidateId),
-      communicationRating: form.communicationRating === '' ? null : Number(form.communicationRating),
-      finalRating: form.finalRating === '' ? null : Number(form.finalRating),
-      scheduledAt: form.scheduledAt || null,
-      internalSkillAssessments: form.internalSkillAssessments.map((s) => ({
-        ...s, selfRating: s.selfRating === '' ? null : Number(s.selfRating), rating: s.rating === '' ? null : Number(s.rating)
-      })),
-      clientSkillAssessments: form.clientSkillAssessments.map((s) => ({
-        ...s, selfRating: s.selfRating === '' ? null : Number(s.selfRating), rating: s.rating === '' ? null : Number(s.rating)
-      })),
-      codingRounds: form.codingRounds.map((c) => ({
-        ...c,
-        noOfQuestions: c.noOfQuestions === '' ? null : Number(c.noOfQuestions),
-        timeTakenMins: c.timeTakenMins === '' ? null : Number(c.timeTakenMins)
-      }))
-    };
     try {
-      const saved = isEdit ? await updateInterview(id, payload) : await createInterview(payload);
-      toast.success(isEdit ? 'Assessment updated.' : 'Assessment created.');
+      const saved = isEdit ? await updateInterview(id, buildPayload()) : await createInterview(buildPayload());
+      toast.success(isEdit ? 'Assessment saved.' : 'Assessment created.');
       navigate(`/interviews/${saved.interviewId}`);
-    } catch (e) {
-      setError(e?.response?.data?.message || 'Failed to save assessment.');
+    } catch (e2) {
+      setError(e2?.response?.data?.message || 'Failed to save assessment.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Panel action: save the feedback AND submit it (moves the interview to SUBMITTED and emails the recruiter).
+  const handleSubmitFeedback = async () => {
+    setError('');
+    if (!form.candidateId) {
+      setError('Please select or create a candidate first.');
+      return;
+    }
+    if (!window.confirm('Submit your feedback? This marks the interview as SUBMITTED and notifies the recruiter to review it.')) {
+      return;
+    }
+    setSaving(true);
+    try {
+      const saved = await submitInterviewFeedback(id, buildPayload());
+      toast.success('Feedback submitted. The recruiter has been notified.');
+      navigate(`/interviews/${saved.interviewId}`);
+    } catch (e2) {
+      setError(e2?.response?.data?.message || 'Failed to submit feedback.');
     } finally {
       setSaving(false);
     }
@@ -295,10 +319,23 @@ export default function InterviewFormPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save assessment'}</button>
-          <button className="btn btn-secondary" type="button" onClick={() => navigate(-1)}>Cancel</button>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className={isEdit ? 'btn btn-secondary' : 'btn btn-primary'} type="submit" disabled={saving}>
+            {saving ? 'Saving…' : (isEdit ? 'Save draft' : 'Save assessment')}
+          </button>
+          {isEdit && (
+            <button className="btn btn-primary" type="button" onClick={handleSubmitFeedback} disabled={saving}>
+              {saving ? 'Submitting…' : 'Submit feedback'}
+            </button>
+          )}
+          <button className="btn btn-ghost" type="button" onClick={() => navigate(-1)}>Cancel</button>
         </div>
+        {isEdit && (
+          <p style={{ color: 'var(--ink-muted)', fontSize: 12.5, marginTop: 8 }}>
+            "Save draft" keeps your changes without notifying anyone. "Submit feedback" finalises the assessment,
+            marks the interview as submitted, and emails the recruiter to review it.
+          </p>
+        )}
       </form>
     </div>
   );

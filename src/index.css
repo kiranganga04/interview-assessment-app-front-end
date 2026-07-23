@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 
 :root {
   --ink: #142033;
@@ -1506,4 +1506,663 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 @media (max-width: 900px) {
   .app-sidebar { position: fixed; z-index: 20; }
   .app-main { margin-left: 68px; }
+}
+
+/* ---------- Role dashboards: quick actions, pipeline funnel, workload, calibration ---------- */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 720px) {
+  .quick-actions { grid-template-columns: repeat(2, 1fr); }
+}
+
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quick-action:hover {
+  border-color: var(--navy);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.quick-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  font-size: 15px;
+}
+
+.funnel-row,
+.workload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.funnel-row:last-child,
+.workload-row:last-child { border-bottom: none; }
+
+.funnel-label,
+.workload-name {
+  flex: 0 0 120px;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.funnel-track {
+  flex: 1;
+  height: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.funnel-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.funnel-count {
+  flex: 0 0 auto;
+  min-width: 34px;
+  text-align: right;
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.pill-harsh {
+  background: #fbe9e7;
+  color: var(--r1);
+  border: 1px solid #f3c9c4;
+}
+
+.pill-lenient {
+  background: #eaf7f0;
+  color: var(--r5);
+  border: 1px solid #cbe9d8;
+}
+
+.muted-note {
+  margin: 10px 0 0;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  font-style: italic;
+}
+
+/* ---------- Status donut + clickable legend (per-status Excel export) ---------- */
+.status-donut-card .card-body { display: flex; justify-content: center; }
+
+.status-donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.status-donut-figure { position: relative; }
+
+.status-donut-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.donut-slice { cursor: pointer; }
+.donut-slice path { transition: opacity 0.15s ease, transform 0.15s ease; transform-origin: center; }
+.donut-slice:hover path { opacity: 0.88; }
+
+.donut-slice-label {
+  fill: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.donut-center-value {
+  fill: var(--ink-strong);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+}
+
+.donut-center-label {
+  fill: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  width: 100%;
+}
+
+.status-legend-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.status-legend-chip:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.status-legend-chip:disabled { opacity: 0.6; cursor: progress; }
+
+.status-legend-dot { width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto; }
+.status-legend-label { flex: 1; text-align: left; }
+.status-legend-count { color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+.status-donut-hint { margin: 0; color: var(--ink-muted); font-size: 12.5px; }
+
+/* ---------- KPI tile polish (subtle brand accent + hover lift) ---------- */
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--navy), var(--teal));
+  opacity: 0.9;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--line-strong);
+}
+
+/* The status donut sits in a half-width column now — keep it centered and comfortable. */
+.status-donut-card .card-body { min-height: 340px; align-items: center; }
+
+/* ---------- Clickable monthly bars (per-month Excel download) ---------- */
+.bar-chart-col-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  justify-content: flex-end;
+}
+.bar-chart-col-btn:disabled { cursor: default; }
+.bar-chart-col-btn .bar-chart-bar { transition: filter 0.15s ease, transform 0.15s ease; }
+.bar-chart-col-btn:hover:not(:disabled) .bar-chart-bar {
+  filter: brightness(1.08);
+  transform: translateY(-3px);
+}
+.bar-chart-count {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   World-class dashboard UI kit (stat tiles, card icons, tones)
+   ============================================================ */
+
+/* Tinted icon-badge palette (soft bg + saturated icon), reused by stat tiles and card headers. */
+.tone-indigo { background: #eceefe; color: #4f46e5; }
+.tone-violet { background: #f3ecfe; color: #7c3aed; }
+.tone-green  { background: #e4f6ee; color: #0f9d58; }
+.tone-amber  { background: #fdf0da; color: #b9740f; }
+.tone-red    { background: #fdebe9; color: #d64541; }
+.tone-sky    { background: #e6f1fd; color: #2a78d6; }
+.tone-pink   { background: #fdeaf1; color: #d64d86; }
+.tone-slate  { background: #eef1f6; color: #566072; }
+
+/* ---- KPI stat tiles ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 38px rgba(20, 32, 51, 0.10);
+  border-color: var(--line-strong);
+}
+
+.stat-icon {
+  flex: 0 0 auto;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stat-icon svg { width: 24px; height: 24px; }
+
+.stat-meta { display: flex; flex-direction: column; min-width: 0; }
+.stat-label {
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.stat-value {
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1.05;
+  margin: 5px 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+.stat-sub { color: var(--ink-muted); font-size: 12px; }
+
+/* ---- Card header icon badge ---- */
+.card-head-main { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.card-icn {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-icn svg { width: 19px; height: 19px; }
+
+/* ---- Refined card + rows ---- */
+.card { box-shadow: 0 1px 2px rgba(20,32,51,0.05), 0 12px 30px rgba(20,32,51,0.05); }
+.card-header { padding: 18px 22px; }
+
+/* Values in list rows read as primary ink (was amber everywhere, which looked noisy). */
+.attention-row strong { color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+.attention-row { padding: 12px 0; }
+
+/* Optional coloured value states for meaningful numbers. */
+.val-danger { color: var(--red) !important; }
+.val-good { color: var(--green) !important; }
+
+/* ---- Section overline ---- */
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 2px 14px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), transparent);
+}
+
+/* =====================================================================
+   Direction B — "Editorial light" theme, scoped to dashboards (.dash-b)
+   Re-themes via CSS variables + a few structural overrides. Nothing here
+   leaks to other pages because every rule is under .dash-b.
+   ===================================================================== */
+.dash-b {
+  --line: #e8e6e1;
+  --line-strong: #dcdad3;
+  --ink: #2b2a27;
+  --ink-strong: #171614;
+  --ink-muted: #9a978d;      /* warm editorial gray */
+  --surface: #ffffff;
+  --surface-soft: #faf9f6;
+  --navy: #171614;           /* primary accent → near-black, monochrome */
+  --navy-dark: #000000;
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+}
+
+/* ---- Header: drop the gradient hero for a clean editorial masthead ---- */
+.dash-b .dashboard-hero {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 0;
+  padding: 2px 2px 24px;
+  margin-bottom: 26px;
+  align-items: flex-end;
+}
+.dash-b .dashboard-hero::after { display: none; }
+.dash-b .dashboard-hero h1 {
+  color: var(--ink-strong);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  font-size: clamp(30px, 4vw, 40px);
+}
+.dash-b .dashboard-hero p { color: var(--ink-muted); max-width: 640px; }
+.dash-b .eyebrow { color: var(--ink-muted); letter-spacing: 0.04em; }
+.dash-b .hero-action { box-shadow: none; }
+
+/* ---- Section overline: quieter, editorial ---- */
+.dash-b .section-eyebrow { color: var(--ink-muted); font-family: var(--font-body); letter-spacing: 0.14em; }
+
+/* ---- KPI strip: one seamless bordered block, hairline dividers, serif numbers ---- */
+.dash-b .stat-grid {
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.dash-b .stat-card {
+  background: var(--surface);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 22px 24px;
+}
+.dash-b .stat-card:hover { transform: none; box-shadow: none; border-color: transparent; }
+.dash-b .stat-icon { display: none; }               /* editorial = no icon chrome */
+.dash-b .stat-label { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-muted); }
+.dash-b .stat-value { font-family: var(--font-serif); font-weight: 600; font-size: 40px; margin: 9px 0 4px; }
+.dash-b .stat-sub { color: #b6b3a9; }
+
+/* ---- Cards: hairline, flat, serif titles, no icon badges ---- */
+.dash-b .card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: none;
+}
+.dash-b .card-header { padding: 22px 24px; }
+.dash-b .card-icn { display: none; }
+.dash-b .card-head-main { gap: 0; }
+.dash-b .card-header h3 { font-family: var(--font-serif); font-weight: 600; font-size: 20px; letter-spacing: -0.2px; }
+.dash-b .card-header p { color: var(--ink-muted); }
+.dash-b .card-body { padding: 8px 24px 22px; }
+
+/* ---- Status donut legend → clean hairline list (not pills) ---- */
+.dash-b .status-legend { grid-template-columns: 1fr; gap: 0; }
+.dash-b .status-legend-chip {
+  background: none;
+  border: none;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 12px 2px;
+  font-weight: 500;
+}
+.dash-b .status-legend-chip:first-child { border-top: none; }
+.dash-b .status-legend-chip:hover:not(:disabled) { transform: none; box-shadow: none; background: var(--surface-soft); }
+.dash-b .status-legend-dot { border-radius: 3px; }   /* squares read more editorial */
+.dash-b .status-donut-hint { color: #b6b3a9; }
+.dash-b .donut-center-value { font-family: var(--font-serif); }
+
+/* ---- List rows / monochrome bars ---- */
+.dash-b .attention-row { border-bottom-color: var(--line); }
+.dash-b .funnel-track, .dash-b .bar-chart-bar { border-radius: 6px; }
+.dash-b .bar-chart-bar { background: #171614; }
+.dash-b .funnel-bar { background: #171614 !important; }
+.dash-b .bar-chart-count { font-family: var(--font-serif); font-weight: 600; }
+
+/* ---- Buttons: editorial (solid black primary, hairline secondary) ---- */
+.dash-b .btn-primary { background: var(--ink-strong); border-color: var(--ink-strong); }
+.dash-b .btn-primary:hover { background: #000; }
+.dash-b .btn-secondary { color: var(--ink-strong); border-color: var(--line-strong); }
+.dash-b .btn-secondary:hover { border-color: var(--ink-strong); }
+.dash-b .btn:hover { transform: none; }
+
+/* ---- Quick actions (recruiter): flatten to editorial ---- */
+.dash-b .quick-action { border-color: var(--line); box-shadow: none; }
+.dash-b .quick-action:hover { transform: none; border-color: var(--ink-strong); box-shadow: none; }
+.dash-b .quick-action-icon { background: var(--surface-soft); }
+
+/* ---- Fusion: bento hero (gradient spotlight donut + editorial KPI cluster), scoped to .dash-b ---- */
+.dash-b .hero-bento {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 960px) { .dash-b .hero-bento { grid-template-columns: 1fr; } }
+
+.dash-b .hero-spot {
+  --surface: rgba(255,255,255,0.10);           /* donut hole becomes translucent on the gradient */
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 20px;
+  padding: 24px 26px;
+  color: #fff;
+  background: linear-gradient(145deg, #201a4d 0%, #4f46e5 62%, #7c3aed 100%);
+  box-shadow: 0 22px 50px rgba(60, 50, 160, 0.28);
+}
+.dash-b .hero-spot::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -40px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);
+}
+.dash-b .hero-spot-head { position: relative; z-index: 1; }
+.dash-b .hero-spot-head h3 { font-family: var(--font-serif); font-weight: 600; font-size: 19px; color: #fff; }
+.dash-b .hero-spot-head p { color: rgba(255,255,255,0.72); font-size: 13px; margin-top: 3px; }
+
+/* Donut sits horizontally beside its legend inside the spotlight. */
+.dash-b .hero-spot .status-donut { flex-direction: row; align-items: center; gap: 22px; max-width: none; margin-top: 12px; position: relative; z-index: 1; }
+.dash-b .hero-spot .status-donut-figure { flex: 0 0 auto; }
+.dash-b .hero-spot .status-legend { flex: 1; }
+.dash-b .hero-spot .status-legend-chip { color: rgba(255,255,255,0.94); border-top-color: rgba(255,255,255,0.14); padding: 8px 2px; }
+.dash-b .hero-spot .status-legend-chip:first-child { border-top: none; }
+.dash-b .hero-spot .status-legend-chip:hover:not(:disabled) { background: rgba(255,255,255,0.06); }
+.dash-b .hero-spot .status-legend-count { color: #fff; font-weight: 700; }
+.dash-b .hero-spot .status-donut-hint { display: none; }
+.dash-b .hero-spot .donut-center-value { fill: #fff; }
+.dash-b .hero-spot .donut-center-label { fill: rgba(255,255,255,0.75); }
+
+/* Editorial KPI cluster: seamless 2x2. */
+.dash-b .kpi-cluster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.dash-b .kpi-cluster .stat-card { background: var(--surface); border: none; border-radius: 0; box-shadow: none; padding: 20px 22px; }
+.dash-b .kpi-cluster .stat-value { font-size: 34px; }
+
+/* ---- Analytics meters + diverging calibration bars (scoped .dash-b) ---- */
+.dash-b .meter-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); }
+.dash-b .meter-row:first-child { border-top: none; }
+.dash-b .meter-label { flex: 0 0 130px; font-weight: 600; font-size: 13.5px; display: flex; align-items: center; gap: 8px; color: var(--ink-strong); }
+.dash-b .meter-track { flex: 1; height: 9px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.dash-b .meter-fill { height: 100%; border-radius: 999px; background: #171614; }
+.dash-b .meter-val { flex: 0 0 auto; min-width: 104px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-strong); }
+.dash-b .meter-val small { color: var(--ink-muted); font-weight: 500; }
+
+.dash-b .cal-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); }
+.dash-b .cal-row:first-child { border-top: none; }
+.dash-b .cal-name { flex: 0 0 160px; font-weight: 600; font-size: 13.5px; }
+.dash-b .cal-name small { display: block; color: var(--ink-muted); font-weight: 500; font-size: 12px; }
+.dash-b .cal-track { flex: 1; position: relative; height: 12px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 999px; }
+.dash-b .cal-center { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--line-strong); }
+.dash-b .cal-fill { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+.dash-b .cal-val { flex: 0 0 64px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Display-only donut (Panel): no pointer affordance. */
+.dash-b .status-donut--static .donut-slice { cursor: default; }
+.dash-b .status-legend-static { cursor: default; }
+.status-donut--static .donut-slice { cursor: default; }
+
+/* ---- Join meeting button (panel): green = go, works in editorial theme too ---- */
+.btn-join { background: #0f9d58; color: #fff; border-color: #0f9d58; }
+.btn-join:hover { background: #0c8a4d; border-color: #0c8a4d; }
+.dash-b .btn-join { background: #0f9d58; border-color: #0f9d58; color: #fff; }
+.dash-b .btn-join:hover { background: #0c8a4d; border-color: #0c8a4d; }
+.join-dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+
+/* ============================================================================
+   In-app narrated dashboard tour ("Watch overview") — DashboardTour.jsx
+   A guided, spoken walkthrough of the overview. Global (not .dash-b-scoped) so
+   the overlay renders identically over any dashboard.
+   ============================================================================ */
+
+/* Launch button in the dashboard hero. */
+.btn-tour {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+}
+.btn-tour:hover { filter: brightness(1.06); box-shadow: 0 6px 18px rgba(79,70,229,0.32); }
+.btn-tour:disabled { opacity: 0.5; cursor: not-allowed; filter: none; box-shadow: none; }
+
+/* Overlay root. */
+.tour-root { position: fixed; inset: 0; z-index: 6000; }
+
+/* Click-blocking backdrop. Transparent by default (the spotlight's shadow paints the dim);
+   the --full variant dims the whole screen for centered intro/outro slides. */
+.tour-backdrop { position: fixed; inset: 0; background: transparent; z-index: 6000; }
+.tour-backdrop--full { background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(1.5px); }
+
+/* Spotlight ring cut around the current section. The huge spread box-shadow dims everything
+   outside the highlighted rectangle. */
+.tour-spot {
+  position: fixed;
+  z-index: 6001;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.72), 0 0 0 3px rgba(124, 58, 237, 0.9), 0 12px 40px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1), left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Caption + controls card. */
+.tour-card {
+  position: fixed;
+  z-index: 6002;
+  background: #ffffff;
+  border: 1px solid #e6e9f2;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+  padding: 18px 20px 16px;
+  max-width: calc(100vw - 32px);
+  animation: tourCardIn 0.28s ease;
+}
+@keyframes tourCardIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+.tour-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.tour-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #7c3aed;
+}
+.tour-x {
+  border: none; background: transparent; font-size: 22px; line-height: 1; cursor: pointer;
+  color: #94a3b8; padding: 0 2px; border-radius: 6px;
+}
+.tour-x:hover { color: #0b1828; background: #f1f5f9; }
+
+.tour-title { margin: 2px 0 6px; font-size: 18px; font-weight: 700; color: #0b1828; }
+.tour-text { margin: 0 0 14px; font-size: 14.5px; line-height: 1.55; color: #334155; }
+
+/* Progress dots. */
+.tour-progress { display: flex; gap: 6px; margin-bottom: 14px; }
+.tour-dot { width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; transition: background 0.2s, transform 0.2s; }
+.tour-dot.is-done { background: #c4b5fd; }
+.tour-dot.is-active { background: #7c3aed; transform: scale(1.35); }
+
+/* Controls. */
+.tour-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tour-controls-left { display: flex; gap: 8px; }
+.tour-controls-right { display: flex; align-items: center; gap: 10px; }
+.tour-btn {
+  border: 1px solid #dbe1ec; background: #fff; color: #334155;
+  padding: 7px 13px; border-radius: 9px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.tour-btn:hover:not(:disabled) { border-color: #7c3aed; color: #4f46e5; }
+.tour-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tour-btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border-color: transparent; }
+.tour-btn-primary:hover:not(:disabled) { filter: brightness(1.06); color: #fff; }
+.tour-count { font-size: 12.5px; font-weight: 600; color: #64748b; font-variant-numeric: tabular-nums; }
+.tour-mute {
+  border: none; background: transparent; cursor: pointer; font-size: 16px; padding: 2px 4px;
+  border-radius: 6px; line-height: 1;
+}
+.tour-mute:hover { background: #f1f5f9; }
+.tour-mute.is-muted { opacity: 0.6; }
+.tour-note { margin: 10px 0 0; font-size: 12px; color: #94a3b8; }
+
+@media (max-width: 560px) {
+  .tour-card { left: 16px !important; right: 16px; width: auto !important; transform: none !important;
+    top: auto !important; bottom: 16px !important; }
+  .tour-controls { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-spot, .tour-card { transition: none; animation: none; }
 }

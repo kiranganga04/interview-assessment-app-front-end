@@ -45,7 +45,8 @@ export default function Sidebar({ auth }) {
       items: [
         { to: '/interviews', label: 'Assessments', show: canBrowseAssessments },
         { to: '/interviews/new', label: 'New assessment', show: canBrowseAssessments },
-        { to: '/my-interviews', label: 'My Interviews', show: isPanel }
+        { to: '/my-interviews', label: 'My Interviews', show: isPanel },
+        { to: '/my-interview-history', label: 'My Interview History', show: isPanel }
       ]
     },
     {

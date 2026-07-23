@@ -1,10 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listInterviewSlots, listCandidates, createCandidate, scheduleInterview } from '../api/apiClient';
+import { listInterviewSlots, listCandidates, createCandidate, scheduleInterview, uploadFile } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
 
 const LEVELS = ['L1', 'L2', 'L3', 'HR', 'CLIENT'];
 const MODE_LABEL = { VIRTUAL: 'Online', IN_PERSON: 'In-Person', TELEPHONIC: 'Telephonic' };
+
+// Mirrors the resume types the backend FileStorageService accepts (pdf / doc / docx).
+const RESUME_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+const hasAllowedResumeType = (file) =>
+  RESUME_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext));
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -37,6 +42,7 @@ export default function ScheduleInterviewPage() {
   const [recruiterName, setRecruiterName] = useState('');
   const [recruiterEmail, setRecruiterEmail] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -79,6 +85,7 @@ export default function ScheduleInterviewPage() {
     if (newCandidateMode && !newCandidate.email.trim()) { setError('Please enter the candidate’s email so they can be notified.'); return; }
     if (!recruiterEmail.trim()) { setError('Please enter the recruiter email.'); return; }
     if (isOnline && !meetingLink.trim()) { setError('Please add a meeting link for this online interview.'); return; }
+    if (resumeFile && !hasAllowedResumeType(resumeFile)) { setError('Resume must be a PDF, DOC, or DOCX file.'); return; }
 
     setSaving(true);
     try {
@@ -87,6 +94,20 @@ export default function ScheduleInterviewPage() {
         const created = await createCandidate(newCandidate);
         resolvedCandidateId = created.candidateId;
       }
+
+      // Upload the resume to the candidate BEFORE scheduling, so the confirmation email (built and
+      // sent inside scheduleInterview) can attach it. A failed upload must not block scheduling, so
+      // we warn and continue — the interview still gets booked, just without the attachment.
+      let resumeAttached = false;
+      if (resumeFile) {
+        try {
+          await uploadFile('CANDIDATE_RESUME', resolvedCandidateId, resumeFile);
+          resumeAttached = true;
+        } catch (upErr) {
+          toast.error(`Couldn't upload the resume (${upErr?.response?.data?.message || 'please try again from the assessment page'}); scheduling without it.`);
+        }
+      }
+
       const interview = await scheduleInterview({
         candidateId: resolvedCandidateId,
         slotId,
@@ -96,7 +117,10 @@ export default function ScheduleInterviewPage() {
         recruiterEmail,
         meetingLink
       });
-      toast.success('Interview scheduled. Confirmation emails are on their way to the interviewer, candidate, and recruiter.');
+
+      toast.success(resumeAttached
+        ? 'Interview scheduled — the resume is attached to the confirmation email sent to the candidate, interviewer, and recruiter.'
+        : 'Interview scheduled. Confirmation emails are on their way to the interviewer, candidate, and recruiter.');
       navigate(`/interviews/${interview.interviewId}`);
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to schedule interview.');
@@ -246,6 +270,22 @@ export default function ScheduleInterviewPage() {
               </div>
             </div>
           )}
+
+          <h3 style={{ margin: '20px 0 12px' }}>Resume</h3>
+          <div className="form-grid cols-3">
+            <div className="field" style={{ gridColumn: 'span 3' }}>
+              <label>Candidate resume (optional)</label>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setResumeFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                disabled={saving}
+              />
+              {resumeFile
+                ? <small className="muted-cell">Selected: {resumeFile.name}</small>
+                : <small className="muted-cell">PDF, DOC, or DOCX. Attaches to the candidate’s record; you can also add it later from the assessment page.</small>}
+            </div>
+          </div>
 
           <div style={{ marginTop: 24, display: 'flex', gap: 10 }}>
             <button type="button" className="btn btn-primary" disabled={saving} onClick={handleSubmit}>
