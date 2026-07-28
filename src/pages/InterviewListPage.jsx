@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { listInterviews, deleteInterview } from '../api/apiClient';
 import RatingBadge from '../components/RatingBadge';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
 
 const STATUSES = ['SCHEDULED', 'IN_PROGRESS', 'SUBMITTED', 'RECOMMENDED', 'CLOSED'];
 const PAGE_SIZE = 10;
 
 export default function InterviewListPage({ auth }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [pageData, setPageData] = useState({ content: [], totalElements: 0, totalPages: 0, page: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,7 +43,13 @@ export default function InterviewListPage({ auth }) {
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this interview assessment? This cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this assessment?',
+      message: 'This permanently removes the interview assessment record. This cannot be undone.',
+      confirmLabel: 'Delete assessment',
+      tone: 'danger'
+    });
+    if (!ok) return;
     try {
       await deleteInterview(id);
       toast.success('Assessment deleted.');
@@ -58,7 +66,7 @@ export default function InterviewListPage({ auth }) {
   })();
 
   return (
-    <main className="page">
+    <main className="page dash-b">
       <section className="dashboard-hero">
         <div>
           <div className="eyebrow">Interview Assessment System</div>
@@ -93,11 +101,14 @@ export default function InterviewListPage({ auth }) {
             <p>{interviews.length} record{interviews.length !== 1 ? 's' : ''} on this page</p>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <label className="sr-only" htmlFor="assessment-search">Search candidate, panel, or recruiter</label>
             <input
+              id="assessment-search"
+              className="input"
               placeholder="Search candidate, panel, recruiter…"
               value={search}
               onChange={(e) => { setPage(0); setSearch(e.target.value); }}
-              style={{ border: '1px solid var(--line)', borderRadius: 8, padding: '9px 11px', minWidth: 220 }}
+              style={{ minWidth: 220 }}
             />
             <label className="toolbar-filter">
               <span>Level</span>
@@ -148,7 +159,17 @@ export default function InterviewListPage({ auth }) {
                 </thead>
                 <tbody>
                   {interviews.map((iv) => (
-                    <tr key={iv.interviewId} className="clickable" onClick={() => navigate(`/interviews/${iv.interviewId}`)}>
+                    <tr
+                      key={iv.interviewId}
+                      className="clickable"
+                      tabIndex={0}
+                      role="link"
+                      aria-label={`View assessment for ${iv.candidateName}`}
+                      onClick={() => navigate(`/interviews/${iv.interviewId}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/interviews/${iv.interviewId}`); }
+                      }}
+                    >
                       <td><strong>{iv.candidateName}</strong><br /><span className="muted-cell">{iv.currentRole || '-'}</span></td>
                       <td><span className="pill">{iv.levelOfInterview || '-'}</span></td>
                       <td><span className={`status-chip status-${(iv.status || '').toLowerCase()}`}>{(iv.status || '-').replace('_', ' ')}</span></td>

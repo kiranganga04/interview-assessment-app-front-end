@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { listUsers, createUser, updateUserRole } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
+import { CardHeader } from '../components/DashboardUI';
 
 const ROLES = ['ADMIN', 'RECRUITER', 'PANEL'];
 const EMPTY_FORM = { fullName: '', email: '', password: '', role: 'PANEL' };
@@ -8,6 +10,7 @@ const EMPTY_FORM = { fullName: '', email: '', password: '', role: 'PANEL' };
 /** Module 2 (admin-only): manage recruiter/panel/admin accounts and deactivate access. */
 export default function UsersPage() {
   const toast = useToast();
+  const confirm = useConfirm();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,6 +54,15 @@ export default function UsersPage() {
   };
 
   const toggleActive = async (user) => {
+    if (user.active) {
+      const ok = await confirm({
+        title: 'Deactivate this account?',
+        message: `${user.fullName} will immediately lose access to sign in. You can reactivate them from this page at any time.`,
+        confirmLabel: 'Deactivate account',
+        tone: 'danger'
+      });
+      if (!ok) return;
+    }
     try {
       await updateUserRole(user.userId, { role: user.role, active: !user.active });
       toast.success(`${user.fullName} ${user.active ? 'deactivated' : 'reactivated'}.`);
@@ -61,7 +73,7 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">Administration</div>
@@ -71,6 +83,7 @@ export default function UsersPage() {
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
+        <CardHeader icon="plus" tone="indigo" title="Add a user" subtitle="They can sign in immediately with the temporary password below." />
         <div className="card-body form-grid cols-4">
           <div className="field">
             <label>Full name</label>
@@ -103,10 +116,11 @@ export default function UsersPage() {
 
       {!loading && (
         <div className="card data-card">
+          <CardHeader icon="users" tone="slate" title="All users" subtitle={`${users.length} account${users.length !== 1 ? 's' : ''}`} />
           <table>
             <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
             <tbody>
-              {users.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No users yet.</td></tr>}
+              {users.length === 0 && <tr><td colSpan={5} className="table-empty-row">No users yet.</td></tr>}
               {users.map((user) => (
                 <tr key={user.userId}>
                   <td><strong>{user.fullName}</strong></td>
@@ -116,9 +130,16 @@ export default function UsersPage() {
                       {ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
                     </select>
                   </td>
-                  <td><span className="pill">{user.active ? 'Active' : 'Deactivated'}</span></td>
+                  <td>
+                    <span className={`status-chip ${user.active ? 'status-recommended' : 'status-closed'}`}>
+                      {user.active ? 'Active' : 'Deactivated'}
+                    </span>
+                  </td>
                   <td className="row-actions">
-                    <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(user)}>
+                    <button
+                      className={`btn btn-sm ${user.active ? 'btn-danger' : 'btn-ghost'}`}
+                      onClick={() => toggleActive(user)}
+                    >
                       {user.active ? 'Deactivate' : 'Reactivate'}
                     </button>
                   </td>

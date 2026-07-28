@@ -191,6 +191,9 @@ export const getTodaysAgenda = () => api.get('/reports/today-agenda').then(r => 
 export const downloadInterviewsCsv = (month) =>
   api.get('/reports/export', { params: month ? { month } : {}, responseType: 'blob' }).then(r => r.data);
 
+export const downloadInterviewsPdf = () =>
+  api.get('/reports/export/pdf', { responseType: 'blob' }).then(r => r.data);
+
 // Helper: turn a Blob into a browser file download.
 export const saveBlob = (blob, filename) => {
   const url = URL.createObjectURL(blob);
@@ -202,5 +205,16 @@ export const saveBlob = (blob, filename) => {
   a.remove();
   URL.revokeObjectURL(url);
 };
+
+// Fetch attachment as Blob (for resume preview in browser).
+export const fetchAttachmentBlob = (attachmentId) =>
+  api.get(`/files/${attachmentId}`, { responseType: 'blob' }).then(r => r.data);
+
+// Download attachment via the browser's own download manager (opens save dialog).
+export const downloadAttachment = (attachmentId, originalFilename) =>
+  fetchAttachmentBlob(attachmentId).then((blob) => saveBlob(blob, originalFilename));
+
+// Auth - fetch current user's profile + entitlements.
+export const getMe = () => api.get('/auth/me').then(r => r.data);
 
 export default api;

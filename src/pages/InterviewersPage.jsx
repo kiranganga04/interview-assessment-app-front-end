@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { searchInterviewers, createInterviewer, updateInterviewer, deleteInterviewer } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
+import { CardHeader } from '../components/DashboardUI';
 
 const EMPTY_FORM = { fullName: '', email: '', contactNumber: '', account: '', grade: '', levelCapability: '', skillSet: '' };
 const PAGE_SIZE = 10;
@@ -14,6 +16,7 @@ const PAGE_SIZE = 10;
  */
 export default function InterviewersPage() {
   const toast = useToast();
+  const confirm = useConfirm();
   const [pageData, setPageData] = useState({ content: [], page: 0, size: PAGE_SIZE, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -81,7 +84,13 @@ export default function InterviewersPage() {
   };
 
   const remove = async (interviewer) => {
-    if (!window.confirm(`Remove ${interviewer.fullName} from the interviewer directory?`)) return;
+    const ok = await confirm({
+      title: 'Remove this interviewer?',
+      message: `${interviewer.fullName} will be removed from the interviewer directory.`,
+      confirmLabel: 'Remove interviewer',
+      tone: 'danger'
+    });
+    if (!ok) return;
     try {
       await deleteInterviewer(interviewer.interviewerId);
       toast.success('Interviewer removed.');
@@ -95,7 +104,7 @@ export default function InterviewersPage() {
   const hasActiveFilter = Boolean(search.trim()) || statusFilter !== 'ALL';
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">People Management</div>
@@ -105,6 +114,7 @@ export default function InterviewersPage() {
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
+        <CardHeader icon="plus" tone="indigo" title="Add an interviewer" subtitle="They become bookable for Interview Slots right away." />
         <div className="card-body form-grid cols-4">
           <div className="field">
             <label>Full name</label>
@@ -147,8 +157,14 @@ export default function InterviewersPage() {
 
       {!loading && (
         <div className="card data-card">
+          <CardHeader
+            icon="interviewers"
+            tone="sky"
+            title="Interviewer directory"
+            subtitle={`${pageData.totalElements} interviewer${pageData.totalElements !== 1 ? 's' : ''} on file`}
+          />
           <div className="card-body form-grid cols-4" style={{ paddingBottom: 0 }}>
-            <div className="field" style={{ gridColumn: 'span 2' }}>
+            <div className="field span-2">
               <label>Search</label>
               <input value={search} onChange={(e) => { setPage(0); setSearch(e.target.value); }} placeholder="Search name, email, account, skills..." />
             </div>
@@ -165,21 +181,21 @@ export default function InterviewersPage() {
             <table>
               <thead>
                 <tr>
-                  <th className="sortable" onClick={() => toggleSort('fullName')}>Name{sortArrow('fullName')}</th>
-                  <th className="sortable" onClick={() => toggleSort('email')}>Email{sortArrow('email')}</th>
-                  <th className="sortable" onClick={() => toggleSort('account')}>Account{sortArrow('account')}</th>
-                  <th className="sortable" onClick={() => toggleSort('grade')}>Grade{sortArrow('grade')}</th>
-                  <th className="sortable" onClick={() => toggleSort('levelCapability')}>Level{sortArrow('levelCapability')}</th>
-                  <th className="sortable" onClick={() => toggleSort('skillSet')}>Skills{sortArrow('skillSet')}</th>
-                  <th className="sortable" onClick={() => toggleSort('active')}>Status{sortArrow('active')}</th>
+                  <th className="sortable" aria-sort={sortKey === 'fullName' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('fullName')}>Name{sortArrow('fullName')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'email' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('email')}>Email{sortArrow('email')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'account' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('account')}>Account{sortArrow('account')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'grade' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('grade')}>Grade{sortArrow('grade')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'levelCapability' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('levelCapability')}>Level{sortArrow('levelCapability')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'skillSet' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('skillSet')}>Skills{sortArrow('skillSet')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'active' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('active')}>Status{sortArrow('active')}</button></th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {interviewers.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>
-                      {hasActiveFilter ? 'No interviewers match your search/filter.' : 'No interviewers yet.'}
+                    <td colSpan={8} className="table-empty-row">
+                      {hasActiveFilter ? 'No interviewers match your search/filter.' : 'No interviewers yet — add one above to get started.'}
                     </td>
                   </tr>
                 )}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { requestPasswordReset } from '../api/apiClient';
+import { productName } from '../config/navigation';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -21,16 +22,20 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page dash-b">
       <section className="auth-panel">
         <div>
-          <div className="eyebrow">Interview Assessment</div>
+          <div className="auth-brand-row">
+            <span className="mark">IA</span>
+            <strong>{productName}</strong>
+          </div>
+          <div className="eyebrow">Account recovery</div>
           <h1>Reset your password</h1>
           <p>Enter the email on your account and we'll send a reset link if it matches one.</p>
         </div>
 
         {sent ? (
-          <div className="card" style={{ marginTop: 24, padding: 18 }}>
+          <div className="attention-ok" style={{ marginTop: 24 }}>
             If an account exists for {email}, a password reset link has been sent.
           </div>
         ) : (

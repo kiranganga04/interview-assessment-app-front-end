@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signIn, signUp, storeAuth } from '../api/apiClient';
+import { productName } from '../config/navigation';
 
 const REMEMBER_EMAIL_KEY = 'interviewAssessmentRememberedEmail';
 
@@ -77,25 +78,6 @@ const FEATURES = [
   { Icon: AnalyzeIcon, title: 'Analyze', desc: 'Track pass rates and skill trends with built-in reports.' }
 ];
 
-// Illustrative-only preview of the real dashboard/reports screens (module 7) -- not live data.
-const STAGE_LEGEND = [
-  { label: 'Scheduled', pct: 40, color: 'var(--navy)' },
-  { label: 'In progress', pct: 20, color: 'var(--amber)' },
-  { label: 'Submitted', pct: 20, color: 'var(--teal)' },
-  { label: 'Recommended', pct: 15, color: 'var(--green)' },
-  { label: 'Closed', pct: 5, color: 'var(--line-strong)' }
-];
-
-const DONUT_GRADIENT = (() => {
-  let acc = 0;
-  const stops = STAGE_LEGEND.map((s) => {
-    const start = acc;
-    acc += s.pct;
-    return `${s.color} ${start}% ${acc}%`;
-  });
-  return `conic-gradient(${stops.join(', ')})`;
-})();
-
 export default function AuthPage({ mode, onAuthenticated }) {
   const isSignUp = mode === 'signup';
   const navigate = useNavigate();
@@ -142,10 +124,13 @@ export default function AuthPage({ mode, onAuthenticated }) {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page dash-b">
       <div className="auth-card">
         <aside className="auth-illustration" aria-hidden="true">
-          <div className="auth-dot-grid" />
+          <div className="auth-brand-row">
+            <span className="auth-illustration-mark">IA</span>
+            <strong style={{ color: '#fff' }}>{productName}</strong>
+          </div>
 
           <h2 className="auth-headline">
             Track Interviews.<br />
@@ -167,37 +152,6 @@ export default function AuthPage({ mode, onAuthenticated }) {
               </li>
             ))}
           </ul>
-
-          <div className="auth-product-card">
-            <div className="auth-product-topbar">
-              <span /><span /><span />
-              <em>Dashboard</em>
-            </div>
-
-            <div className="auth-product-stats">
-              <div className="auth-stat-tile">
-                <span>Total interviews</span>
-                <strong>128</strong>
-              </div>
-              <div className="auth-stat-tile">
-                <span>Scheduled today</span>
-                <strong>6</strong>
-              </div>
-            </div>
-
-            <div className="auth-product-chart">
-              <div className="auth-donut" style={{ background: DONUT_GRADIENT }} />
-              <ul className="auth-donut-legend">
-                {STAGE_LEGEND.map((s) => (
-                  <li key={s.label}>
-                    <span style={{ background: s.color }} />
-                    {s.label}
-                    <b>{s.pct}%</b>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </aside>
 
         <section className="auth-form-panel">

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { listInterviewSlots, searchInterviewSlots, createInterviewSlot, cancelInterviewSlot, listInterviewers } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
+import { CardHeader } from '../components/DashboardUI';
 
 const MODES = ['VIRTUAL', 'IN_PERSON', 'TELEPHONIC'];
 const MODE_LABEL = { VIRTUAL: 'Online', IN_PERSON: 'In-Person', TELEPHONIC: 'Telephonic' };
@@ -25,6 +27,7 @@ function startOfWeek(date) {
  */
 export default function InterviewSlotsPage() {
   const toast = useToast();
+  const confirm = useConfirm();
   const [pageData, setPageData] = useState({ content: [], page: 0, size: PAGE_SIZE, totalElements: 0, totalPages: 0 });
   const [allSlots, setAllSlots] = useState([]);
   const [interviewers, setInterviewers] = useState([]);
@@ -96,7 +99,13 @@ export default function InterviewSlotsPage() {
   };
 
   const cancel = async (slot) => {
-    if (!window.confirm(`Cancel slot ${slot.slotCode}?`)) return;
+    const ok = await confirm({
+      title: 'Cancel this slot?',
+      message: `Slot ${slot.slotCode} will be marked cancelled and freed up for rebooking.`,
+      confirmLabel: 'Cancel slot',
+      tone: 'danger'
+    });
+    if (!ok) return;
     try {
       await cancelInterviewSlot(slot.slotId);
       toast.success('Slot cancelled.');
@@ -120,7 +129,7 @@ export default function InterviewSlotsPage() {
   const hasActiveFilter = Boolean(search.trim()) || statusFilter !== 'ALL' || modeFilter !== 'ALL';
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">Interview Management</div>
@@ -139,6 +148,7 @@ export default function InterviewSlotsPage() {
       </section>
 
       <div className="card" style={{ marginBottom: 20 }}>
+        <CardHeader icon="plus" tone="indigo" title="Add a slot" subtitle="Opens a bookable window for the Schedule Interview wizard." />
         <div className="card-body form-grid cols-4">
           <div className="field">
             <label>Interviewer</label>
@@ -169,7 +179,7 @@ export default function InterviewSlotsPage() {
             <label>Technology</label>
             <input value={form.technology} onChange={(e) => setForm({ ...form, technology: e.target.value })} placeholder="e.g. Java" />
           </div>
-          <div className="field" style={{ justifyContent: 'flex-end', gridColumn: 'span 2' }}>
+          <div className="field span-2" style={{ justifyContent: 'flex-end' }}>
             <button className="btn btn-primary" type="button" disabled={saving} onClick={handleCreate}>
               {saving ? 'Adding...' : '+ Add Slot'}
             </button>
@@ -182,8 +192,9 @@ export default function InterviewSlotsPage() {
 
       {!loading && (
         <div className="card data-card">
+          <CardHeader icon="today" tone="sky" title="All slots" subtitle={`${pageData.totalElements} slot${pageData.totalElements !== 1 ? 's' : ''}`} />
           <div className="card-body form-grid cols-4" style={{ paddingBottom: 0 }}>
-            <div className="field" style={{ gridColumn: 'span 2' }}>
+            <div className="field span-2">
               <label>Search</label>
               <input value={search} onChange={(e) => { setPage(0); setSearch(e.target.value); }} placeholder="Search slot ID, employee, email, technology..." />
             </div>
@@ -208,24 +219,24 @@ export default function InterviewSlotsPage() {
             <table>
               <thead>
                 <tr>
-                  <th className="sortable" onClick={() => toggleSort('slotCode')}>Slot ID{sortArrow('slotCode')}</th>
-                  <th className="sortable" onClick={() => toggleSort('interviewerName')}>Employee{sortArrow('interviewerName')}</th>
+                  <th className="sortable" aria-sort={sortKey === 'slotCode' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('slotCode')}>Slot ID{sortArrow('slotCode')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'interviewerName' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('interviewerName')}>Employee{sortArrow('interviewerName')}</button></th>
                   <th>Email</th>
                   <th>Contact</th>
-                  <th className="sortable" onClick={() => toggleSort('technology')}>Skill set{sortArrow('technology')}</th>
-                  <th className="sortable" onClick={() => toggleSort('slotDate')}>Date{sortArrow('slotDate')}</th>
-                  <th className="sortable" onClick={() => toggleSort('startTime')}>Time{sortArrow('startTime')}</th>
+                  <th className="sortable" aria-sort={sortKey === 'technology' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('technology')}>Skill set{sortArrow('technology')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'slotDate' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('slotDate')}>Date{sortArrow('slotDate')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'startTime' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('startTime')}>Time{sortArrow('startTime')}</button></th>
                   <th>Technology</th>
-                  <th className="sortable" onClick={() => toggleSort('mode')}>Mode{sortArrow('mode')}</th>
-                  <th className="sortable" onClick={() => toggleSort('status')}>Status{sortArrow('status')}</th>
+                  <th className="sortable" aria-sort={sortKey === 'mode' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('mode')}>Mode{sortArrow('mode')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'status' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('status')}>Status{sortArrow('status')}</button></th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {slots.length === 0 && (
                   <tr>
-                    <td colSpan={11} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>
-                      {hasActiveFilter ? 'No slots match your search/filter.' : 'No slots yet.'}
+                    <td colSpan={11} className="table-empty-row">
+                      {hasActiveFilter ? 'No slots match your search/filter.' : 'No slots yet — add one above to get started.'}
                     </td>
                   </tr>
                 )}

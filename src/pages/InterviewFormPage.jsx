@@ -8,6 +8,8 @@ import {
 import SkillAssessmentTable from '../components/SkillAssessmentTable';
 import CodingRoundTable from '../components/CodingRoundTable';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
+import { CardHeader } from '../components/DashboardUI';
 
 const DEFAULT_SKILLS = ['Core Java', 'Springboot, API', 'Microservices', 'SQL', 'Coding', 'Design patterns']
   .map((name, i) => ({ skillOrder: i + 1, skillName: name, selfRating: '', rating: '', feedback: '' }));
@@ -37,6 +39,7 @@ export default function InterviewFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
   const toast = useToast();
+  const confirm = useConfirm();
 
   const [form, setForm] = useState(emptyForm);
   const [candidateDisplayName, setCandidateDisplayName] = useState('');
@@ -169,7 +172,13 @@ export default function InterviewFormPage() {
       setError('Please select or create a candidate first.');
       return;
     }
-    if (!window.confirm('Submit your feedback? This marks the interview as SUBMITTED and notifies the recruiter to review it.')) {
+    const ok = await confirm({
+      title: 'Submit your feedback?',
+      message: 'This marks the interview as SUBMITTED and notifies the recruiter to review it. You won’t be able to edit the scorecard afterwards.',
+      confirmLabel: 'Submit feedback',
+      tone: 'primary'
+    });
+    if (!ok) {
       return;
     }
     setSaving(true);
@@ -185,7 +194,7 @@ export default function InterviewFormPage() {
   };
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">{isEdit ? 'Edit' : 'New'} assessment</div>
@@ -198,7 +207,7 @@ export default function InterviewFormPage() {
 
       <form onSubmit={handleSubmit}>
         <div className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h3>Candidate & panel details</h3></div>
+          <CardHeader icon="candidates" tone="indigo" title="Candidate & panel details" />
           <div className="card-body form-grid cols-3">
             <div className="field span-2">
               <label>Candidate</label>
@@ -293,7 +302,7 @@ export default function InterviewFormPage() {
         </div>
 
         <div className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h3>Final summary</h3></div>
+          <CardHeader icon="skill" tone="green" title="Final summary" />
           <div className="card-body form-grid cols-3">
             <div className="field"><label>Communication rating</label><input type="number" min="1" max="5" step="0.5" value={form.communicationRating} onChange={(e) => setField('communicationRating', e.target.value)} /></div>
             <div className="field"><label>Final rating</label><input type="number" min="1" max="5" step="0.5" value={form.finalRating} onChange={(e) => setField('finalRating', e.target.value)} /></div>

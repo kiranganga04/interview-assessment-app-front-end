@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listInterviewSlots, listCandidates, createCandidate, scheduleInterview, uploadFile } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
+import { CardHeader } from '../components/DashboardUI';
 
 const LEVELS = ['L1', 'L2', 'L3', 'HR', 'CLIENT'];
 const MODE_LABEL = { VIRTUAL: 'Online', IN_PERSON: 'In-Person', TELEPHONIC: 'Telephonic' };
@@ -130,7 +131,7 @@ export default function ScheduleInterviewPage() {
   };
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">Interview Management</div>
@@ -142,15 +143,16 @@ export default function ScheduleInterviewPage() {
       {error && <div className="error-banner">{error}</div>}
 
       <div className="card">
+        <CardHeader icon="today" tone="indigo" title="New interview booking" subtitle="Pick a slot, then fill in the interview and candidate details." />
         <div className="card-body">
-          <h3 style={{ marginBottom: 12 }}>1. Select interview date</h3>
+          <div className="section-title" style={{ marginTop: 0 }}>1 · Select interview date</div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             <button type="button" className={`btn ${slotDate === todayIso() ? 'btn-primary' : 'btn-secondary'} btn-sm`} onClick={() => setSlotDate(todayIso())}>Today</button>
             <button type="button" className={`btn ${slotDate === tomorrowIso() ? 'btn-primary' : 'btn-secondary'} btn-sm`} onClick={() => setSlotDate(tomorrowIso())}>Tomorrow</button>
             <input type="date" value={slotDate} onChange={(e) => setSlotDate(e.target.value)} />
           </div>
 
-          <h3 style={{ marginBottom: 12 }}>2. Time Slot</h3>
+          <div className="section-title">2 · Time slot</div>
           <div className="field" style={{ marginBottom: 6 }}>
             <select value={slotId} onChange={(e) => setSlotId(e.target.value)} disabled={!slotDate || loadingSlots}>
               <option value="">{loadingSlots ? 'Loading...' : 'Select a time slot'}</option>
@@ -163,7 +165,7 @@ export default function ScheduleInterviewPage() {
           </div>
           <p className="muted-cell">Only active future slots are shown. {slotDate && slots.length === 0 && !loadingSlots ? '0 interviewers available for this date.' : `${slots.length} interviewer${slots.length === 1 ? '' : 's'} available`}</p>
 
-          <h3 style={{ margin: '20px 0 12px' }}>3. Interviewer</h3>
+          <div className="section-title">3 · Interviewer</div>
           <div className="form-grid cols-3">
             <div className="field">
               <label>Interviewer name</label>
@@ -179,7 +181,7 @@ export default function ScheduleInterviewPage() {
             </div>
           </div>
 
-          <h3 style={{ margin: '20px 0 12px' }}>Interview Configuration</h3>
+          <div className="section-title">4 · Interview configuration</div>
           <div className="form-grid cols-3">
             <div className="field">
               <label>Interview type</label>
@@ -209,7 +211,7 @@ export default function ScheduleInterviewPage() {
                 required
               />
             </div>
-            <div className="field" style={{ gridColumn: 'span 2' }}>
+            <div className="field span-2">
               <label>Meeting link{isOnline ? '' : ' (optional for this mode)'}</label>
               <input
                 value={meetingLink}
@@ -220,10 +222,10 @@ export default function ScheduleInterviewPage() {
             </div>
           </div>
 
-          <h3 style={{ margin: '20px 0 12px' }}>Candidate</h3>
+          <div className="section-title">5 · Candidate</div>
           {!newCandidateMode ? (
             <div className="form-grid cols-3">
-              <div className="field" style={{ gridColumn: 'span 2' }}>
+              <div className="field span-2">
                 <label>Candidate</label>
                 <select value={candidateId} onChange={(e) => setCandidateId(e.target.value)}>
                   <option value="">Select candidate</option>
@@ -271,9 +273,9 @@ export default function ScheduleInterviewPage() {
             </div>
           )}
 
-          <h3 style={{ margin: '20px 0 12px' }}>Resume</h3>
+          <div className="section-title">6 · Resume</div>
           <div className="form-grid cols-3">
-            <div className="field" style={{ gridColumn: 'span 3' }}>
+            <div className="field span-3">
               <label>Candidate resume (optional)</label>
               <input
                 type="file"

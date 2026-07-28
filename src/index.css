@@ -1,17 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 
+/* ==========================================================================
+   Design system tokens -- one calm, editorial identity for the whole app.
+   Previously the dashboards (Panel/Recruiter/Admin/Analytics/My Interviews)
+   used a restrained near-monochrome "editorial" look scoped under a `.dash-b`
+   class, while every other screen (auth, tables, forms) used a louder
+   indigo/violet gradient theme with a different display font -- two products
+   stitched together. `.dash-b` is now applied at the app shell + every page
+   root (see App.jsx and each page's outer element) so these tokens, and the
+   `.dash-b …` rules further down, apply everywhere. Values below are the
+   ones that used to live only inside `.dash-b`, promoted to :root, with
+   `--ink-muted` re-picked (below) for WCAG AA contrast at normal text sizes
+   (the original dash-b muted tone measured ~2.9:1 on white).
+   ========================================================================== */
 :root {
-  --ink: #142033;
-  --ink-strong: #0b1828;
-  --ink-muted: #64748b;
-  --paper: #f6f8fb;
+  --ink: #2b2a27;
+  --ink-strong: #171614;
+  --ink-muted: #726f68;
+  --paper: #f7f6f2;
   --surface: #ffffff;
-  --surface-soft: #f9fbfd;
-  --line: #dfe6ef;
-  --line-strong: #cdd7e5;
-  --navy: #4f46e5;
-  --navy-dark: #4338ca;
-  --navy-deep: #1e1b4b;
+  --surface-soft: #faf9f6;
+  --line: #e8e6e1;
+  --line-strong: #dcdad3;
+  --navy: #4338ca;
+  --navy-dark: #3730a3;
+  --navy-deep: #171614;
   --teal: #7c3aed;
   --teal-dark: #6d28d9;
   --green: #1f8a5f;
@@ -29,12 +42,31 @@
   --radius-lg: 12px;
   --shadow-sm: 0 1px 2px rgba(20, 32, 51, 0.06);
   --shadow-md: 0 16px 40px rgba(20, 32, 51, 0.08);
+  /* Serif display face (Fraunces) for every heading, brand mark, KPI number and stat value in the
+     app -- this single variable used to be Lexend; repointing it here is what extends the
+     dashboards' editorial identity to every other screen without having to touch each of the
+     dozens of rules that already reference var(--font-display). */
   --font-display: 'Lexend', 'Inter', sans-serif;
+  --font-serif: 'Lexend', 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 * { box-sizing: border-box; }
+
+/* Screen-reader-only text: keeps a real <label> in the DOM (for accessible name + click target)
+   on inputs where a visible label would be redundant next to a clear placeholder/icon. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 html, body, #root { min-height: 100%; }
 
@@ -101,6 +133,7 @@ button { cursor: pointer; }
 
 .app-title .mark,
 .footer-mark .mark,
+.auth-brand-row .mark,
 .sidebar-brand .mark {
   width: 42px;
   height: 42px;
@@ -186,6 +219,7 @@ button { cursor: pointer; }
   text-transform: uppercase;
 }
 
+
 /* ---------- Layout ---------- */
 .page {
   flex: 1;
@@ -241,7 +275,12 @@ button { cursor: pointer; }
 }
 
 .eyebrow {
-  color: #f4b35f;
+  /* Default: readable on a plain white page (page-header context). The gold accent below is
+     reinstated only inside .dashboard-hero's dark gradient, where it has always lived — this
+     was previously the *only* color, which meant every page-header eyebrow (Candidates,
+     Interviewers, Users, forms, etc.) rendered gold-on-white at roughly 2:1 contrast, well under
+     the WCAG AA 4.5:1 minimum for text. */
+  color: var(--navy-dark);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
@@ -249,15 +288,89 @@ button { cursor: pointer; }
   text-transform: uppercase;
 }
 
+.dashboard-hero .eyebrow { color: #f4b35f; }
+
 .hero-action {
   flex: 0 0 auto;
   box-shadow: 0 12px 24px rgba(0,0,0,0.18);
 }
 
+/* Row of hero action buttons (Watch overview / Download CSV / Download PDF / Schedule interview,
+   etc.). Each button has `flex: 0 0 auto` (never shrinks), so without wrapping, a narrower
+   viewport pushed the row wider than the hero and the last button (often "Schedule interview")
+   got sliced off by the hero's `overflow: hidden` instead of moving to a second line. */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Two-column dashboard layout. IMPORTANT: each column is a `.dashboard-col` — an independent
+   vertical stack (flex column), not a sequence of separately-paired grid rows. Earlier versions
+   put every card-pair in its own `.dashboard-columns` grid row and stacked the rows with a fixed
+   margin-top; because a grid row's height is set by its *tallest* cell, whichever column had the
+   shorter card in a given row picked up extra, uneven space before the next row started. That is
+   what kept reading as "sections not aligned properly" even after the cards themselves were fixed.
+   With one `.dashboard-columns` grid holding two `.dashboard-col` stacks, each column manages its
+   own card-to-card gap independently of how tall the other column's cards are — true masonry, so
+   the vertical rhythm inside a column never depends on the other column's content. */
 .dashboard-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
+  /* `start` so one column's total stack height never stretches the other column's container. */
+  align-items: start;
+}
+
+.dashboard-col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* Full-width stacked cards (My Interviews / My Interview History workspace pages): consistent
+   spacing between sections without repeating an inline `style={{ marginTop }}` on every card. */
+.dash-b .card + .card {
+  margin-top: 16px;
+}
+
+.dash-b .stat-grid {
+  margin-bottom: 16px;
+}
+
+/* ---------- Page header (list/detail/form pages that don't use the big gradient hero) ---------- */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.page-header h1 {
+  font-size: clamp(22px, 3vw, 28px);
+  margin-top: 6px;
+}
+
+.page-header p {
+  max-width: 640px;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 8px 0 0;
+}
+
+.page-header > div:first-child { min-width: 0; }
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
 .metric-grid {
@@ -323,8 +436,36 @@ button { cursor: pointer; }
 .btn-ghost:hover { color: var(--ink); background: var(--surface-soft); }
 .btn-danger { background: #fff; color: var(--red); border-color: #f1cfcb; }
 .btn-danger:hover { background: #fff7f6; }
+/* Solid danger fill -- reserved for the confirming action inside ConfirmDialog, so the one
+   irreversible click in a destructive flow reads as visually distinct from every other button. */
+.btn-danger-solid { background: var(--red); color: #fff; border-color: var(--red); }
+.btn-danger-solid:hover { background: #98332f; border-color: #98332f; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn-sm { min-height: 32px; padding: 6px 11px; font-size: 13px; }
+
+/* Keyboard-focus visibility (WCAG 2.4.7). Only fires for keyboard/programmatic focus, not
+   mouse clicks, so it doesn't add a ring on every button press. */
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.sidebar-link:focus-visible,
+.nav-button:focus-visible,
+.status-legend-chip:focus-visible,
+.bar-chart-col-btn:focus-visible,
+th.sortable button:focus-visible,
+tr.clickable:focus-visible,
+.agenda-row:focus-visible,
+.attention-row:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(67, 56, 202, 0.35);
+  outline-offset: 2px;
+}
+
+/* Row-as-link/button affordances need their own focus treatment since outline on a <tr> can be
+   clipped by table borders in some browsers -- an inset box-shadow always stays visible. */
+tr.clickable:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--navy);
+}
 
 /* ---------- Cards / tables ---------- */
 .card {
@@ -404,13 +545,28 @@ th {
 }
 
 th.sortable {
-  cursor: pointer;
-  user-select: none;
+  padding: 0;
 }
 
-th.sortable:hover {
-  color: var(--ink);
+/* The sort control is a real <button> filling the header cell -- keyboard-operable and announced
+   correctly by screen readers, instead of a bare onClick on a non-interactive <th>. aria-sort on
+   the parent <th> (set inline per column) carries the actual sort state. */
+.th-sort-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  padding: 13px 20px;
 }
+
+.th-sort-btn:hover { color: var(--ink); }
 
 td {
   border-bottom: 1px solid var(--line);
@@ -420,10 +576,18 @@ td {
 }
 
 tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface-soft); }
 tr.clickable { transition: background .15s; }
 tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .muted-cell { color: var(--ink-muted); font-size: 12.5px; }
 .row-actions { white-space: nowrap; text-align: right; }
+
+.table-empty-row {
+  text-align: center;
+  color: var(--ink-muted);
+  padding: 40px 20px !important;
+  font-size: 13.5px;
+}
 
 .pagination {
   display: flex;
@@ -507,11 +671,12 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .gauge span { flex: 1; }
 
 /* ---------- Forms ---------- */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
-.form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.form-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 20px; }
+.form-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.form-grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field.span-2 { grid-column: span 2; }
+.field.span-3 { grid-column: span 3; }
 .field label { color: var(--ink-muted); font-size: 12.5px; font-weight: 700; }
 
 .field input,
@@ -533,13 +698,73 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   border-color: var(--teal);
 }
 
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+  background: var(--surface-soft);
+  color: var(--ink-muted);
+  border-color: var(--line);
+  cursor: not-allowed;
+}
+
+/* Standalone input for spots outside a .field wrapper (e.g. a toolbar search box) --
+   same look/focus/disabled treatment as .field input so nothing on the page reads as an
+   afterthought. (This class was already used in InterviewDetailPage.jsx but had no rule here.) */
+.input {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  padding: 10px 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.input:focus {
+  outline: 3px solid rgba(124,58,237,0.16);
+  border-color: var(--teal);
+}
+
+.input:disabled {
+  background: var(--surface-soft);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
 .field-icon-wrap:focus-within .field-icon { color: var(--navy); }
 
 .field textarea { resize: vertical; min-height: 64px; }
 
+/* File input: give the native "choose file" button the same look as .btn-secondary instead of
+   the unstyled browser default, so upload controls (Bulk Import, resume pickers) match the rest
+   of the form kit. */
+input[type='file'] {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+input[type='file']::file-selector-button {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 9px 14px;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+input[type='file']::file-selector-button:hover {
+  border-color: var(--navy);
+  background: var(--surface-soft);
+}
+
 .skill-row {
   display: grid;
-  grid-template-columns: 1.4fr 0.7fr 0.7fr 2fr 32px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 0.7fr) minmax(0, 2fr) 32px;
   gap: 10px;
   align-items: start;
   margin-bottom: 10px;
@@ -597,6 +822,8 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .agenda-row:last-child { border-bottom: none; }
@@ -681,12 +908,31 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 }
 
 .loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   color: var(--ink-muted);
   font-family: var(--font-mono);
   font-size: 13px;
   padding: 42px;
   text-align: center;
 }
+
+/* Pure-CSS spinner via ::before so every existing `<div className="loading">…</div>` gets it
+   automatically -- no JSX changes needed on any page. */
+.loading::before {
+  content: '';
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--navy);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .error-banner {
   background: #fff7f6;
@@ -696,6 +942,78 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   font-size: 13.5px;
   margin-bottom: 18px;
   padding: 12px 16px;
+}
+
+/* ---------- Confirm dialog (replaces window.confirm across the app) ---------- */
+@keyframes confirmDialogIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(23, 22, 20, 0.5);
+  backdrop-filter: blur(1.5px);
+}
+
+.confirm-dialog {
+  width: min(100%, 420px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 70px -20px rgba(23, 22, 20, 0.45);
+  padding: 26px 26px 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .confirm-dialog { animation: confirmDialogIn 0.18s ease both; }
+}
+
+.confirm-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.confirm-dialog-icon {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fbe9e7;
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.confirm-dialog-title.is-danger { color: var(--ink-strong); }
+
+.confirm-dialog-message {
+  margin: 12px 0 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+@media (max-width: 480px) {
+  .confirm-dialog-actions { flex-direction: column-reverse; }
+  .confirm-dialog-actions .btn { width: 100%; }
 }
 
 /* ---------- Toasts (module 11) ---------- */
@@ -836,9 +1154,25 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   display: grid;
   place-items: center;
   position: relative;
-  background:
-    radial-gradient(560px 360px at 10% -10%, rgba(79, 70, 229, 0.10), transparent 60%),
-    radial-gradient(520px 360px at 100% 100%, rgba(124, 58, 237, 0.09), transparent 55%);
+  /* A restrained, barely-there warm tint instead of the old indigo/violet glow -- calm rather
+     than "marketing landing page". */
+  background: radial-gradient(640px 420px at 50% -12%, rgba(23, 22, 20, 0.035), transparent 60%);
+}
+
+/* Small shared brand row (mark + product name) above the eyebrow on the simpler auth screens
+   (forgot/reset password) -- gives them the same brand anchor the sign in/up split card gets from
+   its illustration side, so all four public pages read as one consistent entry experience. */
+.auth-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.auth-brand-row strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink-strong);
 }
 
 .auth-panel {
@@ -936,18 +1270,40 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   justify-content: center;
   gap: 18px;
   padding: 40px 44px;
-  background: linear-gradient(160deg, var(--surface-soft), #eef0fd);
+  background: linear-gradient(165deg, var(--ink-strong), #302d28 78%);
+  color: #fff;
 }
 
-.auth-dot-grid {
+.auth-illustration-mark {
+  position: relative;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Large, faint watermark of the same brand mark -- fills the visual space the old fake
+   "dashboard preview" mockup used to occupy, without showing anything that looks like real
+   product data. Purely decorative (aria-hidden in markup). */
+.auth-illustration::before {
+  content: 'IA';
   position: absolute;
-  left: 30px;
-  bottom: 26px;
-  width: 92px;
-  height: 60px;
-  background-image: radial-gradient(var(--line-strong) 1.6px, transparent 1.6px);
-  background-size: 14px 14px;
-  opacity: 0.9;
+  right: -30px;
+  bottom: -60px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 260px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.045);
   z-index: 0;
 }
 
@@ -957,14 +1313,15 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   font-size: clamp(23px, 2.4vw, 29px);
   line-height: 1.22;
   margin: 0;
+  color: #fff;
 }
 
-.auth-headline .accent { color: var(--teal); }
+.auth-headline .accent { color: #b9b2ff; }
 
 .auth-headline-sub {
   position: relative;
   z-index: 1;
-  color: var(--ink-muted);
+  color: rgba(255, 255, 255, 0.68);
   font-size: 13.5px;
   line-height: 1.6;
   max-width: 420px;
@@ -994,13 +1351,12 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--navy);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
 }
 
 .auth-feature-icon svg { width: 18px; height: 18px; }
@@ -1008,140 +1364,16 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .auth-feature strong {
   display: block;
   font-size: 13.5px;
-  color: var(--ink-strong);
+  color: #fff;
 }
 
 .auth-feature p {
   margin: 2px 0 0;
-  color: var(--ink-muted);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 12.5px;
   line-height: 1.5;
 }
 
-.auth-product-card {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 380px;
-  background: var(--surface);
-  border-radius: 14px;
-  box-shadow: var(--shadow-md);
-  padding: 16px;
-  margin-top: 2px;
-}
-
-.auth-product-topbar {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 12px;
-}
-
-.auth-product-topbar span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--line-strong);
-}
-
-.auth-product-topbar span:nth-child(1) { background: var(--red); }
-.auth-product-topbar span:nth-child(2) { background: var(--amber); }
-.auth-product-topbar span:nth-child(3) { background: var(--green); }
-
-.auth-product-topbar em {
-  font-style: normal;
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.auth-product-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.auth-stat-tile {
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.auth-stat-tile span {
-  display: block;
-  color: var(--ink-muted);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.auth-stat-tile strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 19px;
-  color: var(--ink-strong);
-  margin-top: 4px;
-}
-
-.auth-product-chart {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.auth-donut {
-  flex: 0 0 auto;
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  position: relative;
-}
-
-.auth-donut::after {
-  content: '';
-  position: absolute;
-  inset: 13px;
-  background: var(--surface);
-  border-radius: 50%;
-}
-
-.auth-donut-legend {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 5px;
-  flex: 1;
-  min-width: 0;
-}
-
-.auth-donut-legend li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  color: var(--ink-muted);
-  white-space: nowrap;
-}
-
-.auth-donut-legend span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-}
-
-.auth-donut-legend b {
-  margin-left: auto;
-  color: var(--ink-strong);
-  font-weight: 700;
-}
 
 .auth-form-panel {
   position: relative;
@@ -1254,7 +1486,6 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   .auth-page { padding: 20px 0; }
   .auth-card { min-height: 0; }
   .auth-illustration { padding: 28px 40px; gap: 14px; }
-  .auth-product-card { display: none; }
   .auth-form-panel { padding: 28px 44px; }
 }
 
@@ -1293,6 +1524,28 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   .footer-links {
     grid-template-columns: 1fr 1fr;
   }
+
+}
+
+/* Intermediate collapse for dense multi-column forms: 721-980px gets 2 columns so a 4- or
+   3-column form never has to squeeze narrower than its inputs can go (root cause of a real
+   horizontal-overflow bug at the 768px tablet breakpoint). Scoped to min-width so it can never
+   overlap/compete with the <=720px rule below that collapses everything to a single column --
+   two overlapping same-specificity media rules fighting over the same property is exactly the
+   kind of thing that's fragile to reason about, so they're kept mutually exclusive instead. */
+@media (max-width: 980px) and (min-width: 721px) {
+  .form-grid.cols-3,
+  .form-grid.cols-4,
+  .skill-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* A field spanning 3 explicit columns has only 2 to span into once the grid above collapses --
+     without this cap, Chromium creates an extra implicit column to satisfy the span (sized by
+     content, since grid-auto-columns is left at its `auto` default), which is exactly the kind of
+     off-viewport overflow this breakpoint exists to prevent. span-2 already fits the 2-column
+     grid untouched, so it needs no override here. */
+  .field.span-3 { grid-column: span 2; }
 }
 
 @media (max-width: 720px) {
@@ -1302,10 +1555,13 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   }
 
   .dashboard-hero,
-  .card-header {
+  .card-header,
+  .page-header {
     align-items: stretch;
     flex-direction: column;
   }
+
+  .page-header-actions { justify-content: flex-start; }
 
   .metric-grid,
   .footer-brand,
@@ -1317,7 +1573,8 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
     grid-template-columns: 1fr;
   }
 
-  .field.span-2 { grid-column: span 1; }
+  .field.span-2,
+  .field.span-3 { grid-column: span 1; }
   .hero-action { width: 100%; }
   .toolbar-filter { align-items: flex-start; flex-direction: column; }
   .toolbar-filter select { width: 100%; }
@@ -1366,6 +1623,9 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 }
 
 .sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(255,255,255,0.06);
   color: rgba(255,255,255,0.8);
@@ -1376,6 +1636,9 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   line-height: 1;
   flex: 0 0 auto;
 }
+
+.sidebar-collapse-btn svg { width: 14px; height: 14px; transition: transform 0.15s ease; }
+.sidebar-collapse-btn svg.flip { transform: rotate(180deg); }
 
 .sidebar-collapse-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
 
@@ -1412,8 +1675,7 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .sidebar-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   border-radius: var(--radius);
   color: rgba(255,255,255,0.76);
   font-size: 13.5px;
@@ -1432,10 +1694,31 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   box-shadow: inset 3px 0 0 var(--teal);
 }
 
+/* Icon glyph shown next to every nav label -- and, in collapsed mode, the ONLY thing shown, so it
+   needs a fixed, legible size rather than an unstyled SVG default (which renders at a browser
+   default of 300x150 if left unsized). */
+.sidebar-link-icon,
+.sidebar-link.soon .sidebar-link-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-link-icon svg { width: 18px; height: 18px; }
+
+/* Collapsed rail: center the icon in the available width since there's no label to align it
+   against. */
+.app-sidebar.collapsed .sidebar-link { justify-content: center; padding: 9px; }
+
 .sidebar-link.soon {
   color: rgba(255,255,255,0.32);
   cursor: not-allowed;
 }
+
+.sidebar-link.soon > span:not(.sidebar-link-icon) { flex: 1; }
 
 .sidebar-link.soon small {
   background: rgba(255,255,255,0.08);
@@ -1445,6 +1728,7 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   letter-spacing: 0.04em;
   padding: 2px 7px;
   text-transform: uppercase;
+  flex: 0 0 auto;
 }
 
 .app-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -1503,9 +1787,75 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 
 .app-topbar-actions .nav-button:hover { background: var(--surface-soft); }
 
+/* Hamburger button that opens the mobile nav drawer -- hidden entirely at desktop widths, where
+   the sidebar is always visible in the layout flow instead of an overlay. */
+.sidebar-mobile-toggle {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  margin-right: 4px;
+}
+
+.sidebar-mobile-toggle span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+}
+
+.sidebar-mobile-toggle:hover { background: var(--surface-soft); }
+
+.sidebar-backdrop { display: none; }
+
 @media (max-width: 900px) {
-  .app-sidebar { position: fixed; z-index: 20; }
-  .app-main { margin-left: 68px; }
+  /* Off-canvas drawer: hidden by translateX until .mobile-open is toggled on by the hamburger
+     button in TopBar. Previously this was `position: fixed` with no transform at all, which put
+     a full 232px-wide sidebar on top of the page with `.app-main` only pushed over by 68px
+     (a value that assumed the desktop-collapsed width) -- on a real phone the sidebar covered
+     roughly the left third of every page, permanently, with no way to get to it out of the way. */
+  .app-sidebar {
+    position: fixed;
+    z-index: 40;
+    width: 232px;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 0 20px 60px rgba(11, 24, 40, 0.35);
+  }
+
+  .app-sidebar.collapsed { width: 232px; }
+  .app-sidebar.collapsed .sidebar-brand { flex-direction: row; padding: 6px 6px 18px; }
+  .app-sidebar.collapsed .sidebar-brand .mark { width: 42px; height: 42px; font-size: 14px; border-radius: 10px; }
+  /* The "collapse to icon rail" affordance only makes sense on a permanently-visible desktop
+     sidebar to reclaim horizontal space -- meaningless on a mobile overlay drawer that's either
+     fully open or fully hidden, so hide the toggle rather than let it hide labels here too. */
+  .sidebar-collapse-btn { display: none; }
+
+  .app-sidebar.mobile-open { transform: translateX(0); }
+
+  .app-main { margin-left: 0; }
+
+  .sidebar-mobile-toggle { display: flex; }
+
+  .sidebar-backdrop.show {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 24, 40, 0.45);
+    z-index: 35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar { transition: none; }
 }
 
 /* ---------- Role dashboards: quick actions, pipeline funnel, workload, calibration ---------- */
@@ -1881,6 +2231,12 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
 }
 
+.dash-b.page {
+  /* Dashboards pack in a hero + KPI row + several cards; a tighter page gutter buys back
+     vertical room so more of the page fits without scrolling. */
+  padding: 22px 0 40px;
+}
+
 /* ---- Header: drop the gradient hero for a clean editorial masthead ---- */
 .dash-b .dashboard-hero {
   background: none;
@@ -1889,8 +2245,8 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   border-radius: 0;
   box-shadow: none;
   min-height: 0;
-  padding: 2px 2px 24px;
-  margin-bottom: 26px;
+  padding: 2px 2px 16px;
+  margin-bottom: 16px;
   align-items: flex-end;
 }
 .dash-b .dashboard-hero::after { display: none; }
@@ -1899,7 +2255,8 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   font-family: var(--font-serif);
   font-weight: 600;
   letter-spacing: -0.4px;
-  font-size: clamp(30px, 4vw, 40px);
+  /* Denser than the plain-page hero — a dashboard masthead doesn't need display-sized type. */
+  font-size: clamp(24px, 3vw, 32px);
 }
 .dash-b .dashboard-hero p { color: var(--ink-muted); max-width: 640px; }
 .dash-b .eyebrow { color: var(--ink-muted); letter-spacing: 0.04em; }
@@ -1925,9 +2282,9 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 }
 .dash-b .stat-card:hover { transform: none; box-shadow: none; border-color: transparent; }
 .dash-b .stat-icon { display: none; }               /* editorial = no icon chrome */
-.dash-b .stat-label { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink-muted); }
-.dash-b .stat-value { font-family: var(--font-serif); font-weight: 600; font-size: 40px; margin: 9px 0 4px; }
-.dash-b .stat-sub { color: #b6b3a9; }
+.dash-b .stat-label { text-transform: none; letter-spacing: 0; font-size: 12px; color: var(--ink-muted); }
+.dash-b .stat-value { font-family: var(--font-serif); font-weight: 600; font-size: 32px; margin: 8px 0 4px; }
+.dash-b .stat-sub { color: #b6b3a9; font-size: 12px; }
 
 /* ---- Cards: hairline, flat, serif titles, no icon badges ---- */
 .dash-b .card {
@@ -1935,12 +2292,25 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   border-radius: 14px;
   box-shadow: none;
 }
-.dash-b .card-header { padding: 22px 24px; }
+.dash-b .card-header { padding: 14px 20px; }
 .dash-b .card-icn { display: none; }
 .dash-b .card-head-main { gap: 0; }
-.dash-b .card-header h3 { font-family: var(--font-serif); font-weight: 600; font-size: 20px; letter-spacing: -0.2px; }
-.dash-b .card-header p { color: var(--ink-muted); }
-.dash-b .card-body { padding: 8px 24px 22px; }
+.dash-b .card-header h3 { font-family: var(--font-serif); font-weight: 600; font-size: 16px; letter-spacing: -0.1px; }
+.dash-b .card-header p { color: var(--ink-muted); font-size: 12.5px; }
+/* Body text inside dashboard cards was falling back to the browser default (16px) because nothing
+   in `.card-body`/`.attention-row`/`.agenda-row` set a font-size — next to 12-13px labels
+   everywhere else on these dashboards, that oversized, inconsistent row text was a big part of
+   what read as "too worst" / not put-together. One base size here, inherited by every row, list
+   item, and count that doesn't already set its own (Notion/Linear-style dense list density). */
+.dash-b .card-body { padding: 4px 20px 12px; font-size: 13px; }
+
+/* Row lists (Needs Attention, Ready for decision, Overdue, Upcoming, Today's Agenda, Recruiter
+   Workload, Calibration Alerts, Data Hygiene, Summary, etc.) pack tighter on dashboards so a
+   capped list doesn't push the page into extra scroll. */
+.dash-b .attention-row,
+.dash-b .agenda-row {
+  padding: 7px 0;
+}
 
 /* ---- Status donut legend → clean hairline list (not pills) ---- */
 .dash-b .status-legend { grid-template-columns: 1fr; gap: 0; }
@@ -1974,16 +2344,19 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 .dash-b .btn:hover { transform: none; }
 
 /* ---- Quick actions (recruiter): flatten to editorial ---- */
-.dash-b .quick-action { border-color: var(--line); box-shadow: none; }
+.dash-b .quick-actions { margin-bottom: 14px; }
+.dash-b .quick-action { border-color: var(--line); box-shadow: none; padding: 11px 14px; }
 .dash-b .quick-action:hover { transform: none; border-color: var(--ink-strong); box-shadow: none; }
 .dash-b .quick-action-icon { background: var(--surface-soft); }
 
-/* ---- Fusion: bento hero (gradient spotlight donut + editorial KPI cluster), scoped to .dash-b ---- */
+/* ---- Fusion: bento hero (gradient spotlight donut + editorial KPI cluster), scoped to .dash-b ----
+   Same 1fr/1fr column ratio and gap as `.dashboard-columns` below, so "Interviews by status" lines
+   up edge-to-edge with the cards in every row underneath it instead of being a different width. */
 .dash-b .hero-bento {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
 }
 @media (max-width: 960px) { .dash-b .hero-bento { grid-template-columns: 1fr; } }
 
@@ -1993,7 +2366,7 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   overflow: hidden;
   border: none;
   border-radius: 20px;
-  padding: 24px 26px;
+  padding: 20px 22px;
   color: #fff;
   background: linear-gradient(145deg, #201a4d 0%, #4f46e5 62%, #7c3aed 100%);
   box-shadow: 0 22px 50px rgba(60, 50, 160, 0.28);
@@ -2007,8 +2380,8 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);
 }
 .dash-b .hero-spot-head { position: relative; z-index: 1; }
-.dash-b .hero-spot-head h3 { font-family: var(--font-serif); font-weight: 600; font-size: 19px; color: #fff; }
-.dash-b .hero-spot-head p { color: rgba(255,255,255,0.72); font-size: 13px; margin-top: 3px; }
+.dash-b .hero-spot-head h3 { font-family: var(--font-serif); font-weight: 600; font-size: 16px; color: #fff; }
+.dash-b .hero-spot-head p { color: rgba(255,255,255,0.72); font-size: 12.5px; margin-top: 3px; }
 
 /* Donut sits horizontally beside its legend inside the spotlight. */
 .dash-b .hero-spot .status-donut { flex-direction: row; align-items: center; gap: 22px; max-width: none; margin-top: 12px; position: relative; z-index: 1; }
@@ -2032,8 +2405,9 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
   border-radius: 18px;
   overflow: hidden;
 }
-.dash-b .kpi-cluster .stat-card { background: var(--surface); border: none; border-radius: 0; box-shadow: none; padding: 20px 22px; }
-.dash-b .kpi-cluster .stat-value { font-size: 34px; }
+.dash-b .kpi-cluster .stat-card { background: var(--surface); border: none; border-radius: 0; box-shadow: none; padding: 14px 18px; }
+.dash-b .kpi-cluster .stat-value { font-size: 24px; margin: 5px 0 2px; }
+.dash-b .kpi-cluster .stat-label { font-size: 11.5px; }
 
 /* ---- Analytics meters + diverging calibration bars (scoped .dash-b) ---- */
 .dash-b .meter-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); }
@@ -2165,4 +2539,295 @@ tr.clickable:hover { background: #f8fbff; cursor: pointer; }
 
 @media (prefers-reduced-motion: reduce) {
   .tour-spot, .tour-card { transition: none; animation: none; }
+  .loading::before { animation: none; }
+}
+
+/* ============================================================================
+   Product UI refresh — modern SaaS
+   These final overrides deliberately replace the previous editorial experiment.
+   They are scoped to the app rather than individual pages so dashboards, tables,
+   forms, and authentication all feel like one product.
+   ============================================================================ */
+:root {
+  --ink: #182230;
+  --ink-strong: #101828;
+  --ink-muted: #667085;
+  --paper: #f7f8fc;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --line: #e4e7ec;
+  --line-strong: #d0d5dd;
+  --navy: #5146e5;
+  --navy-dark: #4338d1;
+  --navy-deep: #211d4d;
+  --teal: #6c4cf5;
+  --teal-dark: #5146e5;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow-md: 0 8px 24px rgba(16, 24, 40, .07);
+}
+
+body { background: var(--paper); }
+h1, h2, h3, h4, .metric-card strong { font-family: var(--font-display); letter-spacing: -.025em; }
+
+/* Signed-in shell */
+.app-shell-sidebar { min-height: 100vh; background: var(--paper); }
+.app-sidebar {
+  width: 252px;
+  background: #211d4d;
+  border-right: 1px solid rgba(255,255,255,.08);
+  box-shadow: 4px 0 18px rgba(16, 24, 40, .04);
+}
+.sidebar-brand { min-height: 74px; padding: 16px 16px 14px; border-bottom: 1px solid rgba(255,255,255,.09); }
+.sidebar-brand .mark, .app-title .mark, .footer-mark .mark, .auth-brand-row .mark {
+  background: linear-gradient(135deg, #735cf7, #5146e5);
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(55, 87, 207, .32);
+}
+.sidebar-brand strong { font-family: var(--font-display); letter-spacing: -.02em; }
+.sidebar-group-title { color: #9aa8d4; font-size: 10px; letter-spacing: .08em; }
+.sidebar-link { border-radius: 8px; color: #d0ceed; font-size: 13px; font-weight: 600; }
+.sidebar-link-icon { color: #aaa5d6; }
+.sidebar-link:hover { background: rgba(255,255,255,.08); color: #fff; }
+.sidebar-link.active {
+  background: rgba(163, 154, 218, .30);
+  border: 2px solid #b7abff;
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.22), inset 3px 0 #ffffff;
+}
+.sidebar-link.active .sidebar-link-icon { color: #fff; }
+.sidebar-collapse-btn { color: #b8c4ef; }
+.app-topbar {
+  min-height: 74px;
+  padding: 0 34px;
+  background: rgba(255,255,255,.92);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+}
+.app-topbar-greeting { color: var(--ink-muted); font-size: 14px; }
+.app-topbar-greeting strong { color: var(--ink-strong); font-weight: 700; }
+.app-topbar-actions .nav-user { color: var(--ink-muted); }
+.app-topbar-actions .role-chip { color: #3653bd; background: #edf1ff; }
+.app-topbar-actions .nav-button { color: var(--ink-muted); border-color: var(--line); }
+
+/* Layout, headers and surfaces */
+.page { width: min(100% - 56px, 1320px); padding: 32px 0 64px; }
+.page-header { align-items: center; margin-bottom: 26px; padding-bottom: 0; border: 0; }
+.page-header h1 { font-size: clamp(25px, 2.5vw, 32px); }
+.page-header p { font-size: 14px; max-width: 700px; }
+.eyebrow { color: var(--navy); font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+.card, .dash-b .card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-header, .dash-b .card-header { padding: 18px 22px; }
+.card-header h3, .dash-b .card-header h3 { font-family: var(--font-display); font-size: 15px; letter-spacing: -.015em; }
+.card-body, .dash-b .card-body { padding: 20px 22px; }
+.metric-card, .dash-b .stat-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.metric-card:hover, .dash-b .stat-card:hover { border-color: #c7d2fe; box-shadow: 0 8px 20px rgba(59, 92, 204, .09); }
+.metric-card strong, .dash-b .stat-value { font-family: var(--font-display); color: var(--ink-strong); }
+
+/* Action system */
+.btn { border-radius: 9px; font-weight: 600; box-shadow: none; }
+.btn-primary, .dash-b .btn-primary { background: #5146e5; border-color: #5146e5; }
+.btn-primary:hover, .dash-b .btn-primary:hover { background: #4338d1; box-shadow: 0 6px 14px rgba(81,70,229,.28); }
+.btn-secondary, .dash-b .btn-secondary { color: #344054; border-color: var(--line-strong); background: #fff; }
+.btn-secondary:hover, .dash-b .btn-secondary:hover { color: var(--navy); border-color: #aab9ec; background: #f8faff; }
+.btn-ghost { color: #475467; }
+
+/* Tables and forms */
+.data-card { border-radius: var(--radius-lg); }
+th { background: #f9fafb; color: #667085; font-size: 11px; }
+td { color: #344054; }
+tbody tr:hover td { background: #f8faff; }
+.field label { color: #344054; }
+.field input, .field select, .field textarea, .input {
+  border-color: var(--line-strong);
+  border-radius: 9px;
+  min-height: 42px;
+}
+.field input:focus, .field select:focus, .field textarea:focus, .input:focus {
+  outline-color: rgba(59,92,204,.16);
+  border-color: var(--navy);
+}
+
+/* Dashboards: remove the conflicting editorial treatment */
+.dash-b { color: var(--ink); }
+.dash-b .dashboard-hero {
+  min-height: 172px;
+  padding: 30px 32px;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(120deg, #211d4d 0%, #38328d 62%, #5146e5 100%);
+  box-shadow: 0 16px 36px rgba(47, 38, 134, .24);
+}
+.dash-b .dashboard-hero h1 { font-family: var(--font-display); color: #fff; font-size: clamp(28px, 3.4vw, 38px); }
+.dash-b .dashboard-hero p { color: rgba(255,255,255,.78); }
+.dash-b .dashboard-hero .eyebrow { color: #cbd5ff; }
+.dash-b .dashboard-hero::after { display: block; height: 3px; background: #9bb0ff; }
+.dash-b .hero-spot {
+  background: linear-gradient(145deg, #211d4d, #5146e5);
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(40, 71, 175, .2);
+}
+.dash-b .hero-spot-head h3, .dash-b .stat-value, .dash-b .bar-chart-count, .dash-b .donut-center-value { font-family: var(--font-display); }
+.dash-b .kpi-cluster { border-radius: 16px; border-color: var(--line); }
+.dash-b .kpi-cluster .stat-card { padding: 16px 18px; }
+.dash-b .bar-chart-bar, .dash-b .funnel-bar, .dash-b .meter-fill { background: var(--navy) !important; }
+.dash-b .status-legend-chip { font-family: var(--font-body); }
+
+/* Authentication: a focused application sign-in, not a marketing landing page */
+.auth-page { background: radial-gradient(circle at 15% 15%, #e8eeff 0, transparent 28%), var(--paper); }
+.auth-card { border-radius: 20px; overflow: hidden; box-shadow: 0 24px 64px rgba(16, 24, 40, .13); }
+.auth-illustration { background: linear-gradient(150deg, #101a3d, #284bb8); }
+.auth-headline, .auth-form-head h1 { font-family: var(--font-display); letter-spacing: -.035em; }
+.auth-form-panel { background: #fff; }
+.auth-submit { background: var(--navy); }
+
+@media (max-width: 900px) {
+  .page { width: min(100% - 32px, 1320px); padding-top: 24px; }
+  .app-topbar { padding: 0 16px; min-height: 62px; }
+  .app-sidebar { background: #211d4d; }
+}
+
+@media (max-width: 560px) {
+  .page-header { align-items: flex-start; }
+  .page-header-actions { width: 100%; flex-wrap: wrap; }
+  .page-header-actions .btn { flex: 1; }
+  .dash-b .dashboard-hero { padding: 24px; min-height: 0; }
+  .card-header, .dash-b .card-header, .card-body, .dash-b .card-body { padding-left: 16px; padding-right: 16px; }
+}
+
+/* Recruiter dashboard: a true two-column grid, not two unrelated masonry stacks.
+   `display: contents` promotes each card into the grid and the named areas retain the
+   deliberately paired content rows: attention/decision, overdue/upcoming, agenda/monthly. */
+.dash-b .dashboard-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "attention decision"
+    "overdue upcoming"
+    "agenda monthly";
+  gap: 22px;
+  align-items: stretch;
+}
+.dash-b .dashboard-col { display: contents; }
+.dash-b .dashboard-col:first-child > :nth-child(1) { grid-area: attention; }
+.dash-b .dashboard-col:first-child > :nth-child(2) { grid-area: overdue; }
+.dash-b .dashboard-col:first-child > :nth-child(3) { grid-area: agenda; }
+.dash-b .dashboard-col:last-child > :nth-child(1) { grid-area: decision; }
+.dash-b .dashboard-col:last-child > :nth-child(2) { grid-area: upcoming; }
+.dash-b .dashboard-col:last-child > :nth-child(3) { grid-area: monthly; }
+.dash-b .dashboard-columns > .card,
+.dash-b .dashboard-columns .dashboard-col > .card {
+  margin: 0;
+  min-width: 0;
+}
+.dash-b .dashboard-columns .card-header {
+  min-height: 96px;
+  align-items: flex-start;
+}
+.dash-b .dashboard-columns .card-body { min-height: 130px; }
+.dash-b .dashboard-columns .attention-row,
+.dash-b .dashboard-columns .agenda-row { min-height: 50px; }
+
+/* The hero reads as one action bar on desktop now that scheduling is intentionally removed. */
+.dash-b .dashboard-hero .hero-actions { align-self: center; }
+.dash-b .dashboard-hero .hero-action { min-width: 142px; }
+
+@media (max-width: 960px) {
+  .dash-b .dashboard-columns {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "attention"
+      "decision"
+      "overdue"
+      "upcoming"
+      "agenda"
+      "monthly";
+  }
+}
+
+/* Make editable controls unmistakable before focus. A light blue field fill, a deliberate
+   border, and a hover state distinguish inputs from plain text on every data-entry screen,
+   including inline table editing in Candidates/Interviewers/Slots. */
+.field input,
+.field select,
+.field textarea,
+.input,
+td input,
+td select,
+td textarea {
+  background: #f9fbff;
+  border: 1px solid #b9c5dc;
+  box-shadow: inset 0 1px 1px rgba(16, 24, 40, .03);
+}
+.field input:hover,
+.field select:hover,
+.field textarea:hover,
+.input:hover,
+td input:hover,
+td select:hover,
+td textarea:hover { border-color: #7890c9; }
+.field input::placeholder,
+.field textarea::placeholder,
+.input::placeholder,
+td input::placeholder,
+td textarea::placeholder { color: #7b8aa5; opacity: 1; }
+td input,
+td select,
+td textarea {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--ink-strong);
+  font: inherit;
+}
+td input:focus,
+td select:focus,
+td textarea:focus {
+  outline: 3px solid rgba(59, 92, 204, .16);
+  border-color: var(--navy);
+  background: #fff;
+}
+
+/* A compact action strip: useful at a glance, but clearly different from a passive card. */
+.dash-b .quick-actions {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 20px 0 22px;
+}
+.dash-b .quick-action {
+  min-height: 72px;
+  padding: 14px 18px;
+  border: 1px solid #dddafa;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff, #f7f5ff);
+  color: #352c8a;
+  box-shadow: 0 3px 10px rgba(33, 58, 130, .05);
+  font-size: 14px;
+  font-weight: 700;
+}
+.dash-b .quick-action:hover {
+  border-color: #9c8fff;
+  background: #fff;
+  color: #4338d1;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(44, 75, 172, .12);
+}
+.dash-b .quick-action-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: #ece9ff;
+  color: #5146e5;
+  font-size: 18px;
 }

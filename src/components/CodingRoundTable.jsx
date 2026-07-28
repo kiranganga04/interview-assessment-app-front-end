@@ -29,7 +29,7 @@ export default function CodingRoundTable({ rows, onChange }) {
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No coding rounds added yet.</td></tr>
+              <tr><td colSpan={7} className="table-empty-row">No coding rounds added yet.</td></tr>
             )}
             {rows.map((row, idx) => (
               <tr key={idx}>

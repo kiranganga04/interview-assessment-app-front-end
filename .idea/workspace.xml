@@ -4,23 +4,45 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="fifth commmit">
-      <change afterPath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" afterDir="false" />
+    <list default="true" id="08708578-7f0f-4542-a878-16a42886c0b0" name="Changes" comment="sixth commmit">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/axios.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/axios.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/chunk-DRWLMN53.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/chunk-DRWLMN53.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/chunk-G3PMV62Z.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/chunk-G3PMV62Z.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/chunk-PJEEZAML.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/chunk-PJEEZAML.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/react-dom.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/react-dom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/react-dom_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/react-dom_client.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/react-router-dom.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/react-router-dom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/react.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/react.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/react_jsx-dev-runtime.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/react_jsx-dev-runtime.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/react_jsx-runtime.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/react_jsx-runtime.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/apiClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/apiClient.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CodingRoundTable.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CodingRoundTable.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/Sidebar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/layout/SiteHeader.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/SiteHeader.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/layout/TopBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layout/TopBar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/AnalyticsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AnalyticsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/DashboardPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/DashboardPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/AuthPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AuthPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/CandidatesPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ForgotPasswordPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ForgotPasswordPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewDetailPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewFormPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewListPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewListPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewSlotsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InterviewersPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ResetPasswordPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ResetPasswordPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ScheduleInterviewPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/SkillCatalogPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/SkillCatalogPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/UsersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/UsersPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,21 +78,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/91767/Downloads/interview-assessment-app/interview-assessment-app/frontend",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/91767/Downloads/interview-assessment-app/interview-assessment-app/frontend&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -110,14 +132,23 @@
       <option name="project" value="LOCAL" />
       <updated>1783862018285</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="sixth commmit">
+      <option name="closed" value="true" />
+      <created>1784813278749</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1784813278750</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="third commmit" />
     <MESSAGE value="fourth commmit" />
     <MESSAGE value="fifth commmit" />
-    <option name="LAST_COMMIT_MESSAGE" value="fifth commmit" />
+    <MESSAGE value="sixth commmit" />
+    <option name="LAST_COMMIT_MESSAGE" value="sixth commmit" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

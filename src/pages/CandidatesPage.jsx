@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { searchCandidates, createCandidate, updateCandidate, deleteCandidate } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
+import { CardHeader } from '../components/DashboardUI';
 
 const EMPTY_FORM = { candidateName: '', email: '', mobileNumber: '', overallExperience: '', currentRole: '' };
 const PAGE_SIZE = 10;
@@ -15,6 +17,7 @@ const PAGE_SIZE = 10;
  */
 export default function CandidatesPage() {
   const toast = useToast();
+  const confirm = useConfirm();
   const [pageData, setPageData] = useState({ content: [], page: 0, size: PAGE_SIZE, totalElements: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -105,7 +108,13 @@ export default function CandidatesPage() {
   };
 
   const remove = async (candidate) => {
-    if (!window.confirm(`Remove ${candidate.candidateName} from the candidate directory?`)) return;
+    const ok = await confirm({
+      title: 'Remove this candidate?',
+      message: `${candidate.candidateName} will be removed from the candidate directory. Any interviews already scheduled for them are not affected.`,
+      confirmLabel: 'Remove candidate',
+      tone: 'danger'
+    });
+    if (!ok) return;
     try {
       await deleteCandidate(candidate.candidateId);
       toast.success('Candidate removed.');
@@ -119,7 +128,7 @@ export default function CandidatesPage() {
   const hasActiveFilter = Boolean(search.trim()) || emailFilter !== 'ALL';
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">People Management</div>
@@ -129,6 +138,7 @@ export default function CandidatesPage() {
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
+        <CardHeader icon="plus" tone="indigo" title="Add a candidate" subtitle="They'll appear in the directory below immediately." />
         <div className="card-body form-grid cols-4">
           <div className="field">
             <label>Candidate name</label>
@@ -163,8 +173,14 @@ export default function CandidatesPage() {
 
       {!loading && (
         <div className="card data-card">
+          <CardHeader
+            icon="candidates"
+            tone="sky"
+            title="Candidate directory"
+            subtitle={`${pageData.totalElements} candidate${pageData.totalElements !== 1 ? 's' : ''} on file`}
+          />
           <div className="card-body form-grid cols-4" style={{ paddingBottom: 0 }}>
-            <div className="field" style={{ gridColumn: 'span 2' }}>
+            <div className="field span-2">
               <label>Search</label>
               <input value={search} onChange={(e) => { setPage(0); setSearch(e.target.value); }} placeholder="Search name, email, mobile, role..." />
             </div>
@@ -181,19 +197,19 @@ export default function CandidatesPage() {
             <table>
               <thead>
                 <tr>
-                  <th className="sortable" onClick={() => toggleSort('candidateName')}>Name{sortArrow('candidateName')}</th>
-                  <th className="sortable" onClick={() => toggleSort('email')}>Email{sortArrow('email')}</th>
-                  <th className="sortable" onClick={() => toggleSort('mobileNumber')}>Mobile{sortArrow('mobileNumber')}</th>
-                  <th className="sortable" onClick={() => toggleSort('overallExperience')}>Experience{sortArrow('overallExperience')}</th>
-                  <th className="sortable" onClick={() => toggleSort('currentRole')}>Current role{sortArrow('currentRole')}</th>
+                  <th className="sortable" aria-sort={sortKey === 'candidateName' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('candidateName')}>Name{sortArrow('candidateName')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'email' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('email')}>Email{sortArrow('email')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'mobileNumber' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('mobileNumber')}>Mobile{sortArrow('mobileNumber')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'overallExperience' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('overallExperience')}>Experience{sortArrow('overallExperience')}</button></th>
+                  <th className="sortable" aria-sort={sortKey === 'currentRole' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}><button type="button" className="th-sort-btn" onClick={() => toggleSort('currentRole')}>Current role{sortArrow('currentRole')}</button></th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {candidates.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>
-                      {hasActiveFilter ? 'No candidates match your search/filter.' : 'No candidates yet.'}
+                    <td colSpan={6} className="table-empty-row">
+                      {hasActiveFilter ? 'No candidates match your search/filter.' : 'No candidates yet — add one above to get started.'}
                     </td>
                   </tr>
                 )}

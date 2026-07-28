@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { listAllSkills, createSkill, updateSkill, deleteSkill } from '../api/apiClient';
 import { useToast } from '../components/layout/ToastProvider';
+import { CardHeader } from '../components/DashboardUI';
 
 /** Module 4 (admin-only): manage the skill catalog that the assessment form's dropdown pulls from. */
 export default function SkillCatalogPage() {
@@ -64,6 +65,7 @@ export default function SkillCatalogPage() {
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
+        <CardHeader icon="plus" tone="indigo" title="Add a skill" subtitle="Available on the assessment form's skill dropdown immediately." />
         <div className="card-body form-grid cols-3">
           <div className="field">
             <label>Skill name</label>
@@ -84,10 +86,11 @@ export default function SkillCatalogPage() {
 
       {!loading && (
         <div className="card data-card">
+          <CardHeader icon="skill" tone="sky" title="All skills" subtitle={`${skills.length} skill${skills.length !== 1 ? 's' : ''} in the catalog`} />
           <table>
             <thead><tr><th>Skill</th><th>Applicable levels</th><th>Status</th><th></th></tr></thead>
             <tbody>
-              {skills.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>No skills yet.</td></tr>}
+              {skills.length === 0 && <tr><td colSpan={4} className="table-empty-row">No skills yet.</td></tr>}
               {skills.map((skill) => (
                 <tr key={skill.skillId}>
                   <td><strong>{skill.name}</strong></td>

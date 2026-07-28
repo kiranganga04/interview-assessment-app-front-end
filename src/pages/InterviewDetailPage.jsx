@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getInterview, changeInterviewStatus, rescheduleInterview, listAttachments, attachmentDownloadHref } from '../api/apiClient';
 import RatingBadge from '../components/RatingBadge';
 import { useToast } from '../components/layout/ToastProvider';
+import { useConfirm } from '../components/layout/ConfirmDialog';
+import { CardHeader } from '../components/DashboardUI';
 
 const NEXT_STATUS = {
   SCHEDULED: ['IN_PROGRESS', 'CLOSED'],
@@ -15,7 +17,7 @@ const NEXT_STATUS = {
 function SkillTable({ title, rows, showSelf }) {
   return (
     <div className="card" style={{ marginBottom: 20 }}>
-      <div className="card-header"><h3>{title}</h3></div>
+      <CardHeader icon="skill" tone="violet" title={title} />
       <table>
         <thead>
           <tr>
@@ -26,7 +28,7 @@ function SkillTable({ title, rows, showSelf }) {
           </tr>
         </thead>
         <tbody>
-          {rows.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--ink-muted)' }}>Not filled in.</td></tr>}
+          {rows.length === 0 && <tr><td colSpan={4} className="table-empty-row">Not filled in.</td></tr>}
           {rows.map((s) => (
             <tr key={s.skillAssessmentId ?? s.skillOrder}>
               <td><strong>{s.skillName || `Skill ${s.skillOrder}`}</strong></td>
@@ -45,6 +47,7 @@ export default function InterviewDetailPage({ auth }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const confirm = useConfirm();
   const [iv, setIv] = useState(null);
   const [attachments, setAttachments] = useState([]);
   const [error, setError] = useState('');
@@ -75,8 +78,14 @@ export default function InterviewDetailPage({ auth }) {
     }
   };
 
-  const handleCancel = () => {
-    if (!window.confirm('Cancel this interview? The candidate, interviewer and recruiter will be notified.')) return;
+  const handleCancel = async () => {
+    const ok = await confirm({
+      title: 'Cancel this interview?',
+      message: 'The candidate, interviewer and recruiter will all be notified of the cancellation.',
+      confirmLabel: 'Cancel interview',
+      tone: 'danger'
+    });
+    if (!ok) return;
     handleStatusChange('CANCELLED');
   };
 
@@ -104,7 +113,7 @@ export default function InterviewDetailPage({ auth }) {
     }
   };
 
-  if (error) return <div className="page"><div className="error-banner">{error}</div></div>;
+  if (error) return <div className="page dash-b"><div className="error-banner">{error}</div></div>;
   if (!iv) return <div className="loading">Loading…</div>;
 
   const nextStatuses = NEXT_STATUS[iv.status] || [];
@@ -119,7 +128,7 @@ export default function InterviewDetailPage({ auth }) {
   const hasAnyFeedback = hasInternal || hasCoding || hasClient || !!iv.overallAssessment;
 
   return (
-    <div className="page">
+    <div className="page dash-b">
       <div className="page-header">
         <div>
           <div className="eyebrow">Assessment · {iv.levelOfInterview}</div>
@@ -203,6 +212,7 @@ export default function InterviewDetailPage({ auth }) {
       {!hasAnyFeedback && (
         <div className="card" style={{ marginBottom: 20 }}>
           <div className="card-body empty-state">
+            <div className="empty-icon">IA</div>
             {iv.status === 'SCHEDULED' && (
               <div>This interview hasn't taken place yet. Panel ratings, coding details and the recommendation
                 will appear here once the panel submits their feedback.</div>
@@ -217,7 +227,7 @@ export default function InterviewDetailPage({ auth }) {
 
       {iv.overallAssessment && (
         <div className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h3>Overall assessment</h3></div>
+          <CardHeader icon="edit" tone="indigo" title="Overall assessment" />
           <div className="card-body">{iv.overallAssessment}</div>
         </div>
       )}
@@ -226,7 +236,7 @@ export default function InterviewDetailPage({ auth }) {
 
       {hasCoding && (
         <div className="card" style={{ marginBottom: 20, overflowX: 'auto' }}>
-          <div className="card-header"><h3>Coding details</h3></div>
+          <CardHeader icon="kit" tone="sky" title="Coding details" />
           <table>
             <thead>
               <tr><th>Skill</th><th># Questions</th><th>Time (mins)</th><th>Complexity</th><th>Status</th><th>Remarks</th></tr>
@@ -251,7 +261,7 @@ export default function InterviewDetailPage({ auth }) {
 
       {(attachments.length > 0 || iv.interviewScreenshotUrl) && (
         <div className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h3>Attachments</h3></div>
+          <CardHeader icon="upload" tone="slate" title="Attachments" />
           <div className="card-body">
             {iv.interviewScreenshotUrl && (
               <div style={{ marginBottom: 8 }}>

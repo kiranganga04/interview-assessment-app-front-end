@@ -26,6 +26,7 @@ import SiteHeader from './components/layout/SiteHeader';
 import SiteFooter from './components/layout/SiteFooter';
 import { ProtectedRoute, PublicOnlyRoute, RoleRoute } from './components/layout/RouteGuards';
 import { ToastProvider } from './components/layout/ToastProvider';
+import { ConfirmProvider } from './components/layout/ConfirmDialog';
 
 /**
  * Module: sidebar shell replaces the old top-nav for signed-in users. Signed-out/auth pages
@@ -36,6 +37,10 @@ import { ToastProvider } from './components/layout/ToastProvider';
  */
 export default function App() {
   const [auth, setAuth] = useState(() => getStoredAuth());
+  // Mobile nav drawer: the sidebar is a fixed off-canvas panel below 900px (see index.css), opened
+  // via the hamburger button TopBar renders on narrow screens. Lifted here since Sidebar and
+  // TopBar are rendered as siblings, not parent/child.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const logout = () => {
     signOut();
@@ -96,25 +101,29 @@ export default function App() {
   if (!auth) {
     return (
       <ToastProvider>
-        <div className="app-shell">
-          <SiteHeader auth={null} />
-          {routes}
-          <SiteFooter compact />
-        </div>
+        <ConfirmProvider>
+          <div className="app-shell dash-b">
+            <SiteHeader />
+            {routes}
+            <SiteFooter compact />
+          </div>
+        </ConfirmProvider>
       </ToastProvider>
     );
   }
 
   return (
     <ToastProvider>
-      <div className="app-shell-sidebar">
-        <Sidebar auth={auth} />
-        <div className="app-main">
-          <TopBar auth={auth} onLogout={logout} />
-          {routes}
-          <SiteFooter />
+      <ConfirmProvider>
+        <div className="app-shell-sidebar dash-b">
+          <Sidebar auth={auth} mobileOpen={mobileNavOpen} onCloseMobile={() => setMobileNavOpen(false)} />
+          <div className="app-main">
+            <TopBar auth={auth} onLogout={logout} onMenuClick={() => setMobileNavOpen((o) => !o)} />
+            {routes}
+            <SiteFooter />
+          </div>
         </div>
-      </div>
+      </ConfirmProvider>
     </ToastProvider>
   );
 }

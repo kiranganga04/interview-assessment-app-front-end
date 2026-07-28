@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { confirmPasswordReset } from '../api/apiClient';
+import { productName } from '../config/navigation';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -25,10 +26,14 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page dash-b">
       <section className="auth-panel">
         <div>
-          <div className="eyebrow">Interview Assessment</div>
+          <div className="auth-brand-row">
+            <span className="mark">IA</span>
+            <strong>{productName}</strong>
+          </div>
+          <div className="eyebrow">Account recovery</div>
           <h1>Choose a new password</h1>
           <p>Paste the reset token from your email and pick a new password.</p>
         </div>
